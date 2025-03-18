@@ -53,6 +53,22 @@ def test_list():
             project_type="back-end",
         )
     )
+    projects.append(
+        Project.objects.create(
+            title='Projet 3',
+            description='Description du projet 3',
+            author=user,
+            project_type="iOS",
+        )
+    )
+    projects.append(
+        Project.objects.create(
+            title='Projet 4',
+            description='Description du projet 4',
+            author=user,
+            project_type="Android",
+        )
+    )
     url = reverse_lazy('project-list')
     response = client.get(url)
     assert response.status_code == 200
