@@ -1,4 +1,5 @@
 import pytest
+import datetime
 from django.test import Client
 from django.urls import reverse_lazy
 
@@ -6,8 +7,23 @@ from authentication.models import User
 from api.models import Project
 
 
-def format_datetime(self, value):
-    return value.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+def format_datetime(value):
+    return (value + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S.%f+01:00')
+
+
+def get_project_list(projects):
+    return [
+        {
+            'id': project.id,
+            'title': project.title,
+            'date_created': format_datetime(project.date_created),
+            'author': {
+                'id': project.author.id,
+                'username': project.author.username
+            },
+            'project_type': project.project_type
+        } for project in projects
+    ]
 
 
 @pytest.mark.django_db
@@ -16,31 +32,28 @@ def test_list():
     user = User.objects.create(
         username='client_test',
         password='password-test',
-        birthday='2000-01-01',
+        birthday=datetime.date(2000, 1, 1),
         can_be_contacted=True,
         can_data_be_shared=True
     )
-    project = Project.objects.create(title='Projet 1', description='Description du projet 1', author=user)
+    projects = []
+    projects.append(
+        Project.objects.create(
+            title='Projet 1',
+            description='Description du projet 1',
+            author=user,
+            project_type="front-end",
+        )
+    )
+    projects.append(
+        Project.objects.create(
+            title='Projet 2',
+            description='Description du projet 2',
+            author=user,
+            project_type="back-end",
+        )
+    )
     url = reverse_lazy('project-list')
     response = client.get(url)
     assert response.status_code == 200
-    # expected = [
-    #     {
-    #         'count': 1,
-    #         'next': None,
-    #         'previous': None,
-    #         'results': [
-    #             {
-    #                 'id': project.id,
-    #                 'title': project.title,
-    #                 'date_created': format_datetime(project.date_created),
-    #                 'author': {
-    #                     'id': user.id,
-    #                     'username': user.username
-    #                 },
-    #                 'project-type': project.project_type
-    #             }
-    #         ]
-    #     }
-    # ]
-    # assert response.json() == expected
+    assert response.json()['results'] == get_project_list(projects)
