@@ -18,11 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 # from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from api.views import ProjectAPIView
+from api.views import ProjectViewset
 
 
 router = routers.SimpleRouter()
-router.register('project', ProjectAPIView, basename='project')
+router.register('project', ProjectViewset, basename='project')
 # router.register('product', ProductViewset, basename='product')
 # router.register('article', ArticleViewset, basename='article')
 # router.register('admin/category', AdminCategoryViewset, basename='admin-category')
