@@ -38,7 +38,8 @@ class Project(models.Model):
             ('front-end', 'Front-end'),
             ('iOS', 'iOS'),
             ('Android', 'Android'),
-        ]
+        ],
+        verbose_name='Type de projet',
     )
     date_created = models.DateTimeField(
         auto_now_add=True,

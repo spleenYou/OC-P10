@@ -19,6 +19,12 @@ class Contributors(admin.ModelAdmin):
 
 @admin.register(Project)
 class Project(admin.ModelAdmin):
+    fields = (
+        'author',
+        'title',
+        'description',
+        'project_type',
+    )
     list_display = (
         'title',
         'author',
