@@ -15,6 +15,9 @@ class Contributors(models.Model):
     def __str__(self):
         return f"{self.user.username} - Contributors"
 
+    class Meta:
+        verbose_name_plural = 'Contributeurs'
+
 
 class Project(models.Model):
     author = models.ForeignKey(
@@ -28,22 +31,25 @@ class Project(models.Model):
         verbose_name='Titre',
     )
     description = models.TextField()
-    type = models.CharFiel(
+    project_type = models.CharField(
         max_length=20,
         choices=[
-            ('back-end', 'back-end'),
-            ('front-end', 'front-end'),
+            ('back-end', 'Back-end'),
+            ('front-end', 'Front-end'),
             ('iOS', 'iOS'),
             ('Android', 'Android'),
         ]
     )
-    created_time = models.DateTimeField(
+    date_created = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Date de création",
     )
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name_plural = 'Projets'
 
 
 class Issue(models.Model):
@@ -64,8 +70,8 @@ class Issue(models.Model):
         verbose_name='Titre'
     )
     description = models.TextField()
-    status = models.CharFiel(
-        max_length=10,
+    status = models.CharField(
+        max_length=20,
         choices=[
             ('To-Do', 'To-Do'),
             ('In Progress', 'In Progress'),
@@ -73,7 +79,7 @@ class Issue(models.Model):
         ],
         default='To-Do',
     )
-    priority = models.CharFiel(
+    priority = models.CharField(
         max_length=6,
         choices=[
             ('LOW', 'Low'),
@@ -82,7 +88,7 @@ class Issue(models.Model):
         ],
         default='LOW',
     )
-    tag = models.CharFiel(
+    tag = models.CharField(
         max_length=12,
         choices=[
             ('BUG', 'Bug'),
@@ -97,13 +103,16 @@ class Issue(models.Model):
         null=True,
         blank=True,
     )
-    created_time = models.DateTimeField(
+    date_created = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Date de création',
     )
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name_plural = 'Problèmes'
 
 
 class Comment(models.Model):
@@ -120,10 +129,13 @@ class Comment(models.Model):
         related_name='comments',
     )
     description = models.TextField()
-    created_time = models.DateTimeField(
+    date_created = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Date de création',
     )
 
     def __str__(self):
         return f"Commentaire pour {self.issue.title} by {self.author.username}"
+
+    class Meta:
+        verbose_name_plural = 'Commentaires'

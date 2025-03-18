@@ -1,3 +1,62 @@
 from django.contrib import admin
+from api.models import Contributors, Issue, Project, Comment
 
-# Register your models here.
+
+@admin.register(Contributors)
+class Contributors(admin.ModelAdmin):
+    fields = (
+        'user',
+        'projects'
+    )
+    list_display = (
+        'user',
+    )
+    list_filter = (
+        'user',
+        'projects',
+    )
+
+
+@admin.register(Project)
+class Project(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'author',
+        'project_type',
+    )
+    list_filter = (
+        'author',
+        'project_type',
+        'date_created',
+    )
+
+
+@admin.register(Issue)
+class Issue(admin.ModelAdmin):
+    list_display = (
+        'author',
+        'project',
+        'title',
+        'description',
+        'priority',
+        'status',
+        'tag',
+        'assigned_user',
+    )
+
+    list_filter = (
+        'author',
+        'project',
+        'priority',
+        'status',
+        'tag',
+        'assigned_user',
+    )
+
+
+@admin.register(Comment)
+class Comment(admin.ModelAdmin):
+    list_display = (
+        'author',
+        'issue',
+    )
