@@ -11,6 +11,9 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['birthday', 'can_be_contacted', 'can_data_be_shared']
 
+    def __str__(self):
+        return self.username
+
     class Meta:
         verbose_name = 'Liste d\'utilisateur'
         verbose_name_plural = 'Liste des utilisateurs'
