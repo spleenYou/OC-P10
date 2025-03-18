@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'softDesk.urls'
+ROOT_URLCONF = 'SoftDesk.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'softDesk.wsgi.application'
+WSGI_APPLICATION = 'SoftDesk.wsgi.application'
 
 
 # Database
