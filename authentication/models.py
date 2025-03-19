@@ -5,7 +5,11 @@ from datetime import datetime
 
 class User(AbstractUser):
 
-    birthday = models.DateField(null=False, blank=False, default=datetime.today().strftime("%Y-%m-%d"))
+    birthday = models.DateField(
+        null=False,
+        blank=False,
+        default=datetime.today().strftime("%Y-%m-%d")
+    )
     can_be_contacted = models.BooleanField(null=False, blank=False, default=False)
     can_data_be_shared = models.BooleanField(null=False, blank=False, default=False)
 
