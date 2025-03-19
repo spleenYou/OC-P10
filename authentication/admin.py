@@ -16,6 +16,8 @@ class User(admin.ModelAdmin):
     )
     list_filter = (
         'is_active',
+        'can_be_contacted',
+        'can_data_be_shared',
     )
     list_display_links = (
         'username',
