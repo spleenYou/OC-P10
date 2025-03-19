@@ -12,7 +12,6 @@ class UserViewset(ModelViewSet):
         return User.objects.all()
 
     def get_serializer_class(self):
-        print(self.action)
         if self.action == 'list':
             return self.list_serializer_class
         if self.action == 'create':

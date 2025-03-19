@@ -7,19 +7,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
+    can_be_contacted = serializers.BooleanField(default=None)
+    can_data_be_shared = serializers.BooleanField(default=None)
 
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2', 'birthday', 'can_be_contacted', 'can_data_be_shared']
         extra_kwargs = {
             'birthday': {'required': True},
-            'can_be_contacted': {'required': True},
-            'can_data_be_shared': {'required': True},
         }
 
     def validate(self, attrs):
+        print(attrs)
         if attrs['password1'] != attrs['password2']:
-            raise serializers.ValidationError({'Password': "Password fields didn't match"})
+            raise serializers.ValidationError({'password': "Password fields didn't match"})
         else:
             return attrs
 

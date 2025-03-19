@@ -10,8 +10,8 @@ class User(AbstractUser):
         blank=False,
         default=datetime.today().strftime("%Y-%m-%d")
     )
-    can_be_contacted = models.BooleanField(null=False, blank=False, default=False)
-    can_data_be_shared = models.BooleanField(null=False, blank=False, default=False)
+    can_be_contacted = models.BooleanField(blank=False, null=False)
+    can_data_be_shared = models.BooleanField(blank=False, null=False)
 
     REQUIRED_FIELDS = ['birthday', 'can_be_contacted', 'can_data_be_shared']
 
