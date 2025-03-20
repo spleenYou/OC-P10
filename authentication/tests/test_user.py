@@ -1,5 +1,6 @@
 import pytest
 import authentication.tests.CONST as C
+import datetime
 
 
 @pytest.fixture
@@ -27,6 +28,18 @@ def test_create_user_error_400_missing_fields(user_data):
         'birthday': ['Ce champ est obligatoire.'],
         'can_be_contacted': ['Ce champ ne peut être nul.'],
         'can_data_be_shared': ['Ce champ ne peut être nul.'],
+    }
+    assert response.status_code == 400
+    assert response.json() == expected_response
+
+
+@pytest.mark.django_db
+def test_create_user_too_young(user_data):
+    data = user_data.copy()
+    data['birthday'] = datetime.date(datetime.datetime.now().year, 1, 1)
+    response = C.client.post(C.url, data)
+    expected_response = {
+        'age': ['You are too young']
     }
     assert response.status_code == 400
     assert response.json() == expected_response

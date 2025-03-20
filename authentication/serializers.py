@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from authentication.models import User
 from django.contrib.auth.password_validation import validate_password
+import datetime
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,11 +19,14 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        print(attrs)
+        # print(attrs)
+        if (datetime.datetime.now().year - attrs['birthday'].year <= 15 and
+                attrs['birthday'].month <= datetime.datetime.now().month and
+                attrs['birthday'].day <= datetime.datetime.now().day):
+            raise serializers.ValidationError({'age': 'You are too young'})
         if attrs['password1'] != attrs['password2']:
             raise serializers.ValidationError({'password': "Password fields didn't match"})
-        else:
-            return attrs
+        return attrs
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -41,3 +45,10 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'can_be_contacted', 'can_data_be_shared']
+
+
+class UserDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['username', 'birthday', 'can_be_contacted', 'can_data_be_shared']
