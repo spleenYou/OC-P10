@@ -29,8 +29,8 @@ router_auth.register('user', UserViewset, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/token/', TokenObtainPairView.as_view(), name='tokain_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='tokain_refresh'),
+    path('user/login/', TokenObtainPairView.as_view(), name='tokain_obtain_pair'),
+    path('user/login/refresh/', TokenRefreshView.as_view(), name='tokain_refresh'),
     path('api/', include(router_project.urls)),
     path('', include(router_auth.urls)),
 ]
