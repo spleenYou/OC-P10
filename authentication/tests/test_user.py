@@ -70,3 +70,18 @@ def test_create_user_error_400_passwords_do_not_match(user_data):
     }
     assert response.status_code == 400
     assert response.json() == expected_response
+
+
+@pytest.mark.django_db
+def test_user_details(user_data):
+    response = C.client.post(C.url, user_data)
+    assert response.json()['id'] == 1
+    user_id = response.json()['id']
+    response = C.client.get(C.url + str(user_id) + "/")
+    assert response.status_code == 200
+    assert response.json() == {
+        'username': user_data['username'],
+        'birthday': user_data['birthday'].strftime('%Y-%m-%d'),
+        'can_be_contacted': user_data['can_be_contacted'],
+        'can_data_be_shared': user_data['can_data_be_shared']
+    }
