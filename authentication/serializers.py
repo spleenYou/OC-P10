@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 import datetime
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
 
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -18,12 +18,14 @@ class UserSerializer(serializers.ModelSerializer):
             'birthday': {'required': True},
         }
 
+    def validate_birthday(self, value):
+        if (datetime.datetime.now().year - value.year <= 15 and
+                value.month <= datetime.datetime.now().month and
+                value.day <= datetime.datetime.now().day):
+            raise serializers.ValidationError({'You are too young'})
+        return value
+
     def validate(self, attrs):
-        # print(attrs)
-        if (datetime.datetime.now().year - attrs['birthday'].year <= 15 and
-                attrs['birthday'].month <= datetime.datetime.now().month and
-                attrs['birthday'].day <= datetime.datetime.now().day):
-            raise serializers.ValidationError({'age': 'You are too young'})
         if attrs['password1'] != attrs['password2']:
             raise serializers.ValidationError({'password': "Password fields didn't match"})
         return attrs
