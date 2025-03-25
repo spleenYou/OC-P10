@@ -1,14 +1,26 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from authentication.serializers import (UserCreateSerializer,
-                                        UserListSerializer,
-                                        UserDetailsSerializer,
-                                        )
+from authentication.serializers import (
+    UserCreateSerializer,
+    UserListSerializer,
+    UserDetailsSerializer,
+)
 from authentication.models import User
+from rest_framework.permissions import BasePermission
+
+
+class IsAuthenticatedForActionsExceptCreate(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return True
+        return request.user.is_authenticated
 
 
 class UserViewset(ModelViewSet):
+
+    permission_classes = [IsAuthenticatedForActionsExceptCreate]
 
     def get_queryset(self):
         return User.objects.all()

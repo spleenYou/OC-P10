@@ -22,12 +22,16 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if (datetime.datetime.now().year - value.year <= 15 and
                 value.month <= datetime.datetime.now().month and
                 value.day <= datetime.datetime.now().day):
-            raise serializers.ValidationError({'You are too young'})
+            raise serializers.ValidationError('You are too young')
         return value
 
     def validate(self, attrs):
         if attrs['password1'] != attrs['password2']:
-            raise serializers.ValidationError({'password': "Password fields didn't match"})
+            raise serializers.ValidationError(
+                {
+                    'detail': "Aucun compte actif n'a été trouvé avec les identifiants fournis"
+                }
+            )
         return attrs
 
     def create(self, validated_data):
