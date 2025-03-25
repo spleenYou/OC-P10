@@ -41,3 +41,15 @@ class ProjectDetailSerializer(ModelSerializer):
             'project_type',
             'issues',
         ]
+
+
+class ProjectSerializerForUserDetail(ModelSerializer):
+
+    class Meta:
+        model = Project
+        fields = [
+            'id',
+            'title',
+            'project_type',
+            'date_created'
+        ]

@@ -24,7 +24,7 @@ class Project(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name='Auteur',
-        related_name='Projects_created',
+        related_name='projects_created',
     )
     title = models.CharField(
         max_length=255,

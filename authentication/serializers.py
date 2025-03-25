@@ -2,6 +2,7 @@ from rest_framework import serializers
 from authentication.models import User
 from django.contrib.auth.password_validation import validate_password
 import datetime
+from api.serializers import ProjectSerializerForUserDetail
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -53,8 +54,15 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'can_be_contacted', 'can_data_be_shared']
 
 
-class UserDetailsSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
+
+    projects_created = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['username', 'birthday', 'can_be_contacted', 'can_data_be_shared']
+        fields = ['username', 'birthday', 'can_be_contacted', 'can_data_be_shared', 'projects_created']
+
+    def get_projects_created(self, instance):
+        queryset = instance.projects_created.all()
+        serializer = ProjectSerializerForUserDetail(queryset, many=True)
+        return serializer.data

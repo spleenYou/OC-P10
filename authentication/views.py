@@ -4,7 +4,7 @@ from rest_framework import status
 from authentication.serializers import (
     UserCreateSerializer,
     UserListSerializer,
-    UserDetailsSerializer,
+    UserDetailSerializer,
 )
 from authentication.models import User
 from rest_framework.permissions import BasePermission
@@ -31,7 +31,7 @@ class UserViewset(ModelViewSet):
         if self.action == 'list':
             return UserListSerializer
         else:
-            return UserDetailsSerializer
+            return UserDetailSerializer
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
