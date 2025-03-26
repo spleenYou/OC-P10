@@ -3,7 +3,7 @@ from api.models import Contributors, Issue, Project, Comment
 
 
 @admin.register(Contributors)
-class Contributors(admin.ModelAdmin):
+class ContributorsAdmin(admin.ModelAdmin):
     fields = (
         'user',
         'project'
@@ -18,8 +18,15 @@ class Contributors(admin.ModelAdmin):
     )
 
 
+class ContributorsInline(admin.TabularInline):
+    model = Contributors
+    fields = ('user',)
+    extra = 0
+
+
 @admin.register(Project)
-class Project(admin.ModelAdmin):
+class ProjectAdmin(admin.ModelAdmin):
+    inlines = [ContributorsInline]
     fields = (
         'author',
         'title',
@@ -39,7 +46,7 @@ class Project(admin.ModelAdmin):
 
 
 @admin.register(Issue)
-class Issue(admin.ModelAdmin):
+class IssueAdmin(admin.ModelAdmin):
     list_display = (
         'author',
         'project',
