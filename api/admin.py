@@ -6,14 +6,15 @@ from api.models import Contributors, Issue, Project, Comment
 class Contributors(admin.ModelAdmin):
     fields = (
         'user',
-        'projects'
+        'project'
     )
     list_display = (
         'user',
+        'project',
     )
     list_filter = (
         'user',
-        'projects',
+        'project',
     )
 
 

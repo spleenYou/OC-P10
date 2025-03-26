@@ -5,18 +5,19 @@ from django.db import models
 class Contributors(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
+        related_name='contributor',
+        verbose_name="Contributeur",
     )
-    projects = models.ManyToManyField(
+    project = models.ForeignKey(
         'Project',
-        verbose_name='Projets',
-        related_name='contributors',
+        on_delete=models.CASCADE,
+        related_name='projet',
+        verbose_name='Projet',
     )
-
-    def __str__(self):
-        return f"{self.user.username} - Contributors"
 
     class Meta:
+        unique_together = ('user', 'project')
         verbose_name_plural = 'Contributeurs'
 
 
