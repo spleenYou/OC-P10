@@ -8,4 +8,5 @@ password = 'password-test'
 birthday = datetime.date(2000, 1, 1)
 can_be_contacted = True
 can_data_be_shared = True
-url = '/user/'
+user_url = '/user/'
+api_url = '/api/'

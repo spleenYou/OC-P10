@@ -9,6 +9,7 @@ class Contributors(models.Model):
     )
     projects = models.ManyToManyField(
         'Project',
+        verbose_name='Projets',
         related_name='contributors',
     )
 

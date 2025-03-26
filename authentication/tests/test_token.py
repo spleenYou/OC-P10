@@ -1,5 +1,5 @@
 import pytest
-import authentication.tests.CONST as C
+import CONST as C
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def user_data():
 
 @pytest.fixture
 def created_user(user_data):
-    C.client.post(C.url, user_data)
+    C.client.post(C.user_url, user_data)
     return user_data
 
 

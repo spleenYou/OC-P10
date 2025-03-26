@@ -1,5 +1,5 @@
 import pytest
-import authentication.tests.CONST as C
+import CONST as C
 import datetime
 import json
 
@@ -21,7 +21,7 @@ def birthday_formated(birthday=C.birthday):
 
 
 def token_obtain():
-    tokens = C.client.post(f"{C.url}login/", {'username': C.username, 'password': C.password})
+    tokens = C.client.post(f"{C.user_url}login/", {'username': C.username, 'password': C.password})
     return tokens.json()['access']
 
 
@@ -33,7 +33,7 @@ def test_create_user_error_400_missing_fields(user_data):
     del data['can_be_contacted']
     del data['can_data_be_shared']
 
-    response = C.client.post(C.url, data)
+    response = C.client.post(C.user_url, data)
     expected_response = {
         'birthday': ['Ce champ est obligatoire.'],
         'can_be_contacted': ['Ce champ ne peut être nul.'],
@@ -47,7 +47,7 @@ def test_create_user_error_400_missing_fields(user_data):
 def test_create_user_too_young(user_data):
     data = user_data.copy()
     data['birthday'] = datetime.date(datetime.datetime.now().year, 1, 1)
-    response = C.client.post(C.url, data)
+    response = C.client.post(C.user_url, data)
     expected_response = {
         'birthday':
         [
@@ -60,7 +60,7 @@ def test_create_user_too_young(user_data):
 
 @pytest.mark.django_db
 def test_user_created_success(user_data):
-    response = C.client.post(C.url, user_data)
+    response = C.client.post(C.user_url, user_data)
     assert response.status_code == 201
     expected_response = {
         'id': 1,
@@ -78,7 +78,7 @@ def test_create_user_error_400_passwords_do_not_match(user_data):
     data = user_data.copy()
     data['password2'] += 'e'  # Pour simuler une erreur de correspondance
 
-    response = C.client.post(C.url, data)
+    response = C.client.post(C.user_url, data)
     expected_response = {
         'detail':
         [
@@ -91,10 +91,10 @@ def test_create_user_error_400_passwords_do_not_match(user_data):
 
 @pytest.mark.django_db
 def test_user_details(user_data):
-    user = C.client.post(C.url, user_data)
+    user = C.client.post(C.user_url, user_data)
     user_id = user.json()['id']
     response = C.client.get(
-        C.url + str(user_id) + "/",
+        C.user_url + str(user_id) + "/",
         headers={
             'Authorization': f'Bearer {token_obtain()}'
         }
@@ -104,17 +104,18 @@ def test_user_details(user_data):
         'username': user_data['username'],
         'birthday': birthday_formated(),
         'can_be_contacted': user_data['can_be_contacted'],
-        'can_data_be_shared': user_data['can_data_be_shared']
+        'can_data_be_shared': user_data['can_data_be_shared'],
+        'projects_created': []
     }
     assert response.json() == expected_response
 
 
 @pytest.mark.django_db
 def test_user_update(user_data):
-    user = C.client.post(C.url, user_data)
+    user = C.client.post(C.user_url, user_data)
     user_id = user.json()['id']
     response = C.client.patch(
-        C.url + str(user_id) + "/",
+        C.user_url + str(user_id) + "/",
         data=json.dumps({'username': 'testeur'}),
         headers={
             'content-type': 'application/json',
@@ -126,16 +127,17 @@ def test_user_update(user_data):
         'username': 'testeur',
         'birthday': birthday_formated(),
         'can_be_contacted': user_data['can_be_contacted'],
-        'can_data_be_shared': user_data['can_data_be_shared']
+        'can_data_be_shared': user_data['can_data_be_shared'],
+        'projects_created': []
     }
 
 
 @pytest.mark.django_db
 def test_user_delete(user_data):
-    user = C.client.post(C.url, user_data)
+    user = C.client.post(C.user_url, user_data)
     user_id = user.json()['id']
     response = C.client.delete(
-        C.url + str(user_id) + "/",
+        C.user_url + str(user_id) + "/",
         headers={
             'Authorization': f'Bearer {token_obtain()}'
         }
@@ -145,8 +147,8 @@ def test_user_delete(user_data):
 
 @pytest.mark.django_db
 def test_user_already_exist(user_data):
-    C.client.post(C.url, user_data)
-    response = C.client.post(C.url, user_data)
+    C.client.post(C.user_url, user_data)
+    response = C.client.post(C.user_url, user_data)
     assert response.status_code == 400
     expected_response = {
         'username': [
@@ -158,19 +160,20 @@ def test_user_already_exist(user_data):
 
 @pytest.mark.django_db
 def test_user_logged(user_data):
-    user = C.client.post(C.url, user_data)
-    response = C.client.get(f"{C.url}{user.json()['id']}/")
+    user = C.client.post(C.user_url, user_data)
+    response = C.client.get(f"{C.user_url}{user.json()['id']}/")
     assert response.status_code == 401
     expected_response = {
         'detail': "Informations d'authentification non fournies."
     }
     assert response.json() == expected_response
-    response = C.client.get(f"{C.url}{user.json()['id']}/", headers={'Authorization': f'Bearer {token_obtain()}'})
+    response = C.client.get(f"{C.user_url}{user.json()['id']}/", headers={'Authorization': f'Bearer {token_obtain()}'})
     assert response.status_code == 200
     expected_response = {
         'username': user_data['username'],
         'birthday': birthday_formated(),
         'can_be_contacted': user_data['can_be_contacted'],
         'can_data_be_shared': user_data['can_data_be_shared'],
+        'projects_created': []
     }
     assert response.json() == expected_response
