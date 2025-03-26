@@ -3,23 +3,23 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-class Contributors(models.Model):
+class Contributor(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.DO_NOTHING,
-        related_name='contributor',
-        verbose_name="Contributeur",
+        on_delete=models.CASCADE,
+        related_name='contributors',
+        verbose_name="Utilisateur",
     )
     project = models.ForeignKey(
         'Project',
         on_delete=models.CASCADE,
-        related_name='projet',
+        related_name='projects',
         verbose_name='Projet',
     )
 
     def clean(self):
         if self.project.author == self.user:
-            raise ValidationError("L'auteur du projet ne peut pas être ajouté aux contriubteurs")
+            raise ValidationError("L'auteur du projet ne peut pas être ajouté aux contributeurs")
 
     def save(self, *args, **kwargs):
         self.full_clean()
