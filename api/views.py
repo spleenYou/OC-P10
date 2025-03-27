@@ -67,7 +67,6 @@ class IssueViewset(ModelViewSet):
         return Issue.objects.all()
 
     def get_serializer_class(self):
-        print(self.action)
         if self.action == 'retrieve':
             return self.detail_serializer_class
         return super().get_serializer_class()

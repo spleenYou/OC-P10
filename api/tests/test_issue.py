@@ -4,6 +4,7 @@ import datetime
 import json
 from authentication.models import User
 from api.models import Project
+from django.core.exceptions import ValidationError
 
 
 @pytest.fixture
@@ -103,6 +104,23 @@ def test_issue(user_data):
         }
     )
     assert response.status_code == 200
+
+    data = user_data.copy()
+    data['username'] = 'User2'
+    user2_response = C.client.post(C.user_url, data)
+    with pytest.raises(ValidationError, match="Vous n'êtes pas affecté au projet"):
+        C.client.post(
+            f'{C.api_url}issue/',
+            data={
+                'project': project.id,
+                'title': 'test',
+                'description': 'test',
+                'status': 'To-Do',
+                'priority': 'LOW',
+                'tag': 'BUG',
+            },
+            headers={'Authorization': f'Bearer {token_obtain(user2_response.json())}'}
+        )
 
     response = C.client.delete(
         f'{C.api_url}issue/1/',
