@@ -24,8 +24,9 @@ from authentication.views import UserViewset
 
 router_project = routers.SimpleRouter()
 router_project.register(r'project', ProjectViewset, basename='project')
-router_contributor = routers.SimpleRouter()
 router_project.register(r'contributor', ContributorViewset, basename='contributor')
+router_project.register(r'issue', ContributorViewset, basename='issue')
+router_project.register(r'comment', ContributorViewset, basename='comment')
 router_auth = routers.SimpleRouter()
 router_auth.register('user', UserViewset, basename='user')
 
@@ -34,6 +35,5 @@ urlpatterns = [
     path('user/login/', TokenObtainPairView.as_view(), name='tokain_obtain_pair'),
     path('user/login/refresh/', TokenRefreshView.as_view(), name='tokain_refresh'),
     path('api/', include(router_project.urls)),
-    path('api/', include(router_contributor.urls)),
     path('', include(router_auth.urls)),
 ]
