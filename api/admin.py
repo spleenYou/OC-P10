@@ -24,9 +24,21 @@ class ContributorInline(admin.TabularInline):
     extra = 0
 
 
+class IssueInline(admin.TabularInline):
+    model = Issue
+    fields = (
+        'title',
+        'author',
+        'status',
+        'priority',
+        'tag',
+    )
+    extra = 0
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    inlines = [ContributorInline]
+    inlines = [ContributorInline, IssueInline]
     fields = (
         'author',
         'title',

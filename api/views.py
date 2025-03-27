@@ -1,6 +1,12 @@
 from rest_framework.viewsets import ModelViewSet
-from api.models import Project, Contributor
-from api.serializers import ProjectSerializer, ProjectDetailSerializer, ContributorSerializer
+from api.models import Project, Contributor, Issue
+from api.serializers import (
+    ProjectSerializer,
+    ProjectDetailSerializer,
+    ContributorSerializer,
+    IssueSerializer,
+    IssueDetailSerializer,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -49,3 +55,27 @@ class ContributorViewset(ModelViewSet):
         product = self.get_object()
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class IssueViewset(ModelViewSet):
+
+    serializer_class = IssueSerializer
+    detail_serializer_class = IssueDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Issue.objects.all()
+
+    def get_serializer_class(self):
+        print(self.action)
+        if self.action == 'retrieve':
+            return self.detail_serializer_class
+        return super().get_serializer_class()
+
+    def create(self, request):
+        serializer = IssueSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
