@@ -182,6 +182,7 @@ class CommentSerializer(ModelSerializer):
         fields = [
             'id',
             'issue',
+            'description',
             'date_created',
         ]
 

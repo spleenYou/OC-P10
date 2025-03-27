@@ -97,7 +97,7 @@ class CommentViewset(ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request):
-        serializer = IssueSerializer(data=request.data, context={'request': request})
+        serializer = CommentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
