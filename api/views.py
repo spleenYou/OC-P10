@@ -1,11 +1,13 @@
 from rest_framework.viewsets import ModelViewSet
-from api.models import Project, Contributor, Issue
+from api.models import Project, Contributor, Issue, Comment
 from api.serializers import (
     ProjectSerializer,
     ProjectDetailSerializer,
     ContributorSerializer,
     IssueSerializer,
     IssueDetailSerializer,
+    CommentSerializer,
+    CommentDetailSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -65,6 +67,29 @@ class IssueViewset(ModelViewSet):
 
     def get_queryset(self):
         return Issue.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return self.detail_serializer_class
+        return super().get_serializer_class()
+
+    def create(self, request):
+        serializer = IssueSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentViewset(ModelViewSet):
+
+    serializer_class = CommentSerializer
+    detail_serializer_class = CommentDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

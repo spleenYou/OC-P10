@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from api.models import Project, Contributor, Issue
+from api.models import Project, Contributor, Issue, Comment
 from authentication.models import User
 
 
@@ -55,36 +55,13 @@ class ProjectDetailSerializer(ModelSerializer):
 
     def get_contributors(self, instance):
         queryset = Contributor.objects.filter(project=instance)
-        contributor_list = []
-        for contributor in queryset:
-            contributor_list.append(
-                {
-                    'id': contributor.user.id,
-                    'username': contributor.user.username
-                }
-            )
+        contributor_list = (contributor.user for contributor in queryset)
         serializer = UserSerializer(contributor_list, many=True)
         return serializer.data
 
     def get_issues(self, instance):
         queryset = Issue.objects.filter(project=instance)
-        issue_list = []
-        for issue in queryset:
-            issue_list.append(
-                {
-                    'id': issue.pk,
-                    'title': issue.title,
-                    'author': issue.author,
-                    'project': issue.project,
-                    'description': issue.description,
-                    'status': issue.status,
-                    'priority': issue.priority,
-                    'tag': issue.tag,
-                    'assigned_user': issue.assigned_user,
-                    'date_created': issue.date_created,
-                }
-            )
-        serializer = IssueWithoutProjectSerializer(issue_list, many=True)
+        serializer = IssueWithoutProjectSerializer(queryset, many=True)
         return serializer.data
 
 
@@ -174,6 +151,7 @@ class IssueDetailSerializer(ModelSerializer):
     author = UserSerializer()
     assigned_user = UserSerializer()
     project = ProjectSerializer()
+    comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Issue
@@ -189,4 +167,45 @@ class IssueDetailSerializer(ModelSerializer):
             'assigned_user',
             'date_created',
             'comments',
+        ]
+
+    def get_comments(self, instance):
+        comment_list = Comment.objects.filter(issue=instance)
+        serializer = CommentSerializer(comment_list, many=True)
+        return serializer.data
+
+
+class CommentSerializer(ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'issue',
+            'date_created',
+        ]
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['author'] = UserSerializer(instance.author).data
+        return ret
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class CommentDetailSerializer(ModelSerializer):
+
+    author = UserSerializer()
+    issue = IssueSerializer()
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'author',
+            'issue',
+            'description',
+            'date_created',
         ]
