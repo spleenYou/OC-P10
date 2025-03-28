@@ -134,7 +134,7 @@ class Issue(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Problèmes'
+        verbose_name_plural = 'Questions'
 
 
 class Comment(models.Model):
@@ -147,7 +147,7 @@ class Comment(models.Model):
     issue = models.ForeignKey(
         'Issue',
         on_delete=models.CASCADE,
-        verbose_name='Problème',
+        verbose_name='Question',
         related_name='comments',
     )
     description = models.TextField()
@@ -158,16 +158,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Commentaire pour {self.issue.title} by {self.author.username}"
-
-    def clean(self):
-        contributor_list = Contributor.objects.filter(project=self.issue.project)
-        contributor_list = (contributor.user for contributor in contributor_list)
-        if not (self.author == self.issue.project.author or self.author in contributor_list):
-            raise ValidationError("Vous n'êtes pas affecté au projet")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Commentaires'

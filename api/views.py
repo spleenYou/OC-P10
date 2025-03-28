@@ -1,3 +1,4 @@
+from itertools import chain
 from rest_framework.viewsets import ModelViewSet
 from api.models import Project, Contributor, Issue, Comment
 from api.serializers import (
@@ -9,9 +10,30 @@ from api.serializers import (
     CommentSerializer,
     CommentDetailSerializer,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework import status
+
+
+class IsAuthenticatedAndInProject(BasePermission):
+
+    message = 'Vous ne faites pas partie du projet'
+
+    def has_permission(self, request, view):
+        print(view.action)
+        if view.action == 'list' and isinstance(view, CommentViewset):
+            self.message = 'Impossible de lister les commentaires'
+            return False
+        if view.action == 'list' and isinstance(view, IssueViewset):
+            self.message = 'Impossible de lister les remarques'
+            return False
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(view, CommentViewset):
+            return obj.issue.project.author == request.user
+        if isinstance(view, IssueViewset):
+            return obj.project.author == request.user
 
 
 class ProjectViewset(ModelViewSet):
@@ -63,7 +85,7 @@ class IssueViewset(ModelViewSet):
 
     serializer_class = IssueSerializer
     detail_serializer_class = IssueDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndInProject]
 
     def get_queryset(self):
         return Issue.objects.all()
@@ -86,7 +108,7 @@ class CommentViewset(ModelViewSet):
 
     serializer_class = CommentSerializer
     detail_serializer_class = CommentDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndInProject]
 
     def get_queryset(self):
         return Comment.objects.all()
@@ -97,9 +119,15 @@ class CommentViewset(ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request):
-        serializer = CommentSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        issue = Issue.objects.get(pk=request.data['issue'])
+        contibutor_list = Contributor.objects.filter(project=issue.project)
+        contibutor_list = (contributor.user for contributor in contibutor_list)
+        contibutor_list = list(chain(contibutor_list, [issue.author]))
+        if request.user in contibutor_list:
+            serializer = CommentSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': "Vous n'êtes pas affecté au projet"}, status=status.HTTP_401_UNAUTHORIZED)
