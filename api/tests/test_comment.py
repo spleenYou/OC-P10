@@ -3,7 +3,6 @@ import CONST as C
 import datetime
 from authentication.models import User
 from api.models import Project, Issue
-from django.core.exceptions import ValidationError
 
 
 @pytest.fixture
@@ -95,11 +94,14 @@ def test_issue(user_data):
         }
     }
     assert comment_response.json() == expected_response
-    with pytest.raises(ValidationError, match="Vous n'êtes pas affecté au projet"):
-        C.client.post(
-            f'{C.api_url}comment/', {
-                'issue': issue.id,
-                'description': 'Description test'
-            },
-            headers={'Authorization': f'Bearer {token_obtain(user2_response.json())}'}
-        )
+    response = C.client.post(
+        f'{C.api_url}comment/', {
+            'issue': issue.id,
+            'description': 'Description test'
+        },
+        headers={'Authorization': f'Bearer {token_obtain(user2_response.json())}'}
+    )
+    assert response == 401
+    expected_response = {
+        'detail': 'Vous ne faites pas partie du projet'
+    }
