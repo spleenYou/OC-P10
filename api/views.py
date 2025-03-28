@@ -21,19 +21,29 @@ class IsAuthenticatedAndInProject(BasePermission):
 
     def has_permission(self, request, view):
         print(view.action)
-        if view.action == 'list' and isinstance(view, CommentViewset):
-            self.message = 'Impossible de lister les commentaires'
-            return False
-        if view.action == 'list' and isinstance(view, IssueViewset):
-            self.message = 'Impossible de lister les remarques'
-            return False
+
+        if view.action == 'list':
+            if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
+                if isinstance(view, CommentViewset):
+                    self.message = 'Impossible de lister les commentaires'
+                elif isinstance(view, IssueViewset):
+                    self.message = 'Impossible de lister les remarques'
+                return False
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(view, CommentViewset):
-            return obj.issue.project.author == request.user
-        if isinstance(view, IssueViewset):
-            return obj.project.author == request.user
+        if isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset):
+            return True
+        elif isinstance(view, CommentViewset):
+            author = obj.issue.project.author
+            project = obj.issue.project
+        elif isinstance(view, IssueViewset):
+            author = obj.project.author
+            project = obj.project
+        contibutor_list = Contributor.objects.filter(project=project)
+        contibutor_list = (contributor.user for contributor in contibutor_list)
+        contibutor_list = list(chain(contibutor_list, [author]))
+        return request.user in contibutor_list
 
 
 class ProjectViewset(ModelViewSet):
