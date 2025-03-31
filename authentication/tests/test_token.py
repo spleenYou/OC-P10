@@ -14,7 +14,8 @@ class TestToken:
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        # Initiate the database with an user
+        'Initiate the database with an user'
+
         self.user_data = {
             'username': C.username,
             'password1': C.password,
@@ -57,7 +58,8 @@ class TestToken:
 
     @pytest.mark.django_db
     def test_token_obtain_not_success(self):
-        # Check the failure with a wrong password
+        'Check the failure with a wrong password'
+
         response = C.client.post(f'{C.user_url}login/', {
             'username': self.user_data['username'],
             'password': 'wrong_password',
