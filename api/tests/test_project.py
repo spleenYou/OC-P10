@@ -8,173 +8,209 @@ from authentication.models import User
 from api.models import Project
 
 
-@pytest.fixture
-def user_data():
-    return {
-        'username': C.username,
-        'password1': C.password,
-        'password2': C.password,
-        'birthday': C.birthday,
-        'can_be_contacted': C.can_be_contacted,
-        'can_data_be_shared': C.can_data_be_shared,
-    }
+@pytest.mark.django_db
+class TestProject:
 
+    @classmethod
+    def setup_class(cls):
+        print('\nDébut des tests pour les projets')
 
-def birthday_formated(birthday=C.birthday):
-    return birthday.strftime('%Y-%m-%d')
+    @classmethod
+    def teardown_class(cls):
+        print('\rFin des tests')
 
+    def setup_method(self, method):
+        self.length = len(f'    Début du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+        print(f'\r    Début du test : {method.__name__}')
 
-def token_obtain():
-    tokens = C.client.post(
-        f"{C.user_url}login/",
-        {
+    def teardown_method(self, method):
+        print(f'\r    Fin du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.user1_data = {
             'username': C.username,
-            'password': C.password,
+            'password1': C.password,
+            'password2': C.password,
+            'birthday': C.birthday,
+            'can_be_contacted': C.can_be_contacted,
+            'can_data_be_shared': C.can_data_be_shared,
         }
-    )
-    return tokens.json()['access']
+        self.user1 = C.client.post(C.user_url, self.user1_data)
+        user = User.objects.get(pk=self.user1.json()['id'])
+        self.projects = []
+        self.projects.append(
+            Project.objects.create(
+                title='Projet 1',
+                description='Description du projet 1',
+                project_type="front-end",
+                author=user
+            )
+        )
+        self.projects.append(
+            Project.objects.create(
+                title='Projet 2',
+                description='Description du projet 2',
+                project_type="back-end",
+                author=user
+            )
+        )
+        self.projects.append(
+            Project.objects.create(
+                title='Projet 3',
+                description='Description du projet 3',
+                project_type="iOS",
+                author=user
+            )
+        )
+        self.projects.append(
+            Project.objects.create(
+                title='Projet 4',
+                description='Description du projet 4',
+                project_type="Android",
+                author=user
+            )
+        )
 
+    def birthday_formated(self, birthday=C.birthday):
+        return birthday.strftime('%Y-%m-%d')
 
-def format_datetime(value):
-    return (value + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S.%f+01:00')
+    def get_token_access(self, user_data):
+        tokens = C.client.post(
+            f"{C.user_url}login/",
+            {
+                'username': user_data['username'],
+                'password': user_data['password1'],
+            }
+        )
+        return tokens.json()['access']
 
+    def format_datetime(self, value):
+        return (value + datetime.timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S.%f+02:00')
 
-def get_project_list(projects):
-    return [
-        {
-            'id': project.id,
-            'title': project.title,
-            'description': project.description,
-            'date_created': format_datetime(project.date_created),
-            'author': {
-                'id': project.author.id,
-                'username': project.author.username
+    def get_project_list(self, projects):
+        return [
+            {
+                'id': project.id,
+                'title': project.title,
+                'description': project.description,
+                'date_created': self.format_datetime(project.date_created),
+                'author': {
+                    'id': project.author.id,
+                    'username': project.author.username
+                },
+                'project_type': project.project_type
+            } for project in projects
+        ]
+
+    def test_project_add_fail(self):
+        self.user1
+        project_response = C.client.post(
+            f'{C.api_url}project/',
+            data={
+                'title': 'test',
+                'description': 'test',
+                'project_type': 'Android'
             },
-            'project_type': project.project_type
-        } for project in projects
-    ]
+        )
+        assert project_response.status_code == 401
 
+    def test_project_add(self):
+        self.user1
+        project_response = C.client.post(
+            f'{C.api_url}project/',
+            data={
+                'title': 'test',
+                'description': 'test',
+                'project_type': 'Android'
+            },
+            headers={'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'}
+        )
+        assert project_response.status_code == 201
 
-@pytest.mark.django_db
-def test_project_add(user_data):
-    user_response = C.client.post(C.user_url, user_data)
-    assert user_response.status_code == 201
-    project_response = C.client.post(
-        f'{C.api_url}project/',
-        data={
-            'title': 'test',
-            'description': 'test',
-            'project_type': 'Android'
-        },
-    )
-    assert project_response.status_code == 401
-    project_response = C.client.post(
-        f'{C.api_url}project/',
-        data={
-            'title': 'test',
-            'description': 'test',
-            'project_type': 'Android'
-        },
-        headers={'Authorization': f'Bearer {token_obtain()}'}
-    )
-    assert project_response.status_code == 201
-
-
-@pytest.mark.django_db
-def test_project_update(user_data):
-    test_project_add(user_data)
-    url = reverse_lazy('project-list')
-    token = token_obtain()
-    response = C.client.get(url, headers={'Authorization': f'Bearer {token}'})
-    project_id = response.json()['results'][0]['id']
-    response_update = C.client.patch(
-        f'{C.api_url}project/{project_id}/',
-        data=json.dumps({'description': 'changement de description'}),
-        headers={
-            'content-type': 'application/json',
-            'Authorization': f'Bearer {token}'
+    def test_project_update(self):
+        project = self.projects[0]
+        project_id = project.id
+        token = self.get_token_access(self.user1_data)
+        response_update = C.client.patch(
+            f'{C.api_url}project/{project_id}/',
+            data=json.dumps({'description': 'changement de description'}),
+            headers={
+                'content-type': 'application/json',
+                'Authorization': f'Bearer {token}'
+            }
+        )
+        assert response_update.status_code == 200
+        expected_response = {
+            'id': project_id,
+            'title': response_update.json()['title'],
+            'description': 'changement de description',
+            'author': response_update.json()['author'],
+            'project_type': response_update.json()['project_type'],
+            'date_created': response_update.json()['date_created'],
         }
-    )
-    assert response.status_code == 200
-    expected_response = {
-        'id': response.json()['results'][0]['id'],
-        'title': response.json()['results'][0]['title'],
-        'description': 'changement de description',
-        'author': response.json()['results'][0]['author'],
-        'project_type': response.json()['results'][0]['project_type'],
-        'date_created': response.json()['results'][0]['date_created'],
-    }
-    assert response_update.json() == expected_response
+        assert response_update.json() == expected_response
 
+    def test_project_update_fail(self):
+        project = self.projects[0]
+        project_id = project.id
+        response_update = C.client.patch(
+            f'{C.api_url}project/{project_id}/',
+            data=json.dumps({'description': 'changement de description'}),
+            headers={
+                'content-type': 'application/json',
+            }
+        )
+        assert response_update.status_code == 401
+        expected_response = {
+            'detail': "Informations d'authentification non fournies."
+        }
+        assert response_update.json() == expected_response
 
-@pytest.mark.django_db
-def test_project_list(user_data):
-    user_response = C.client.post(C.user_url, user_data)
-    user = User.objects.get(pk=user_response.json()['id'])
-    projects = []
-    projects.append(
-        Project.objects.create(
-            title='Projet 1',
-            description='Description du projet 1',
-            author=user,
-            project_type="front-end",
+    def test_project_list(self):
+        url = reverse_lazy('project-list')
+        response = C.client.get(
+            url,
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'
+            }
         )
-    )
-    projects.append(
-        Project.objects.create(
-            title='Projet 2',
-            description='Description du projet 2',
-            author=user,
-            project_type="back-end",
-        )
-    )
-    projects.append(
-        Project.objects.create(
-            title='Projet 3',
-            description='Description du projet 3',
-            author=user,
-            project_type="iOS",
-        )
-    )
-    projects.append(
-        Project.objects.create(
-            title='Projet 4',
-            description='Description du projet 4',
-            author=user,
-            project_type="Android",
-        )
-    )
-    url = reverse_lazy('project-list')
-    response = C.client.get(url)
-    assert response.status_code == 401
-    response = C.client.get(url, headers={'Authorization': f'Bearer {token_obtain()}'})
-    assert response.status_code == 200
-    assert response.json()['results'] == get_project_list(projects)
+        assert response.status_code == 200
+        assert response.json()['results'] == self.get_project_list(self.projects)
 
+    def test_project_list_fail(self):
+        url = reverse_lazy('project-list')
+        response = C.client.get(url)
+        assert response.status_code == 401
 
-@pytest.mark.django_db
-def test_project_detail(user_data):
-    user_response = C.client.post(C.user_url, user_data)
-    user = User.objects.get(pk=user_response.json()['id'])
-    projects = []
-    projects.append(
-        Project.objects.create(
-            title='Projet 1',
-            description='Description du projet 1',
-            author=user,
-            project_type="front-end",
+    def test_project_detail(self):
+        response = C.client.get(
+            f'{C.api_url}project/1/',
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'
+            }
         )
-    )
-    response = C.client.get(f'{C.api_url}project/1/', headers={'Authorization': f'Bearer {token_obtain()}'})
-    assert response.status_code == 200
-    expected_response = {
-        'id': response.json()['id'],
-        'title': response.json()['title'],
-        'description': response.json()['description'],
-        'author': response.json()['author'],
-        'project_type': response.json()['project_type'],
-        'date_created': response.json()['date_created'],
-        'issues': [],
-        'contributors': [],
-    }
-    assert response.json() == expected_response
+        assert response.status_code == 200
+        expected_response = {
+            'id': response.json()['id'],
+            'title': response.json()['title'],
+            'description': response.json()['description'],
+            'author': response.json()['author'],
+            'project_type': response.json()['project_type'],
+            'date_created': response.json()['date_created'],
+            'issues': [],
+            'contributors': [],
+        }
+        assert response.json() == expected_response
+
+    def test_project_detail_fail(self):
+        response = C.client.get(
+            f'{C.api_url}project/1/',
+        )
+        assert response.status_code == 401
+        expected_response = {
+            'detail': "Informations d'authentification non fournies."
+        }
+        assert response.json() == expected_response

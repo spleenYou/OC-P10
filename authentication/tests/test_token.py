@@ -12,6 +12,15 @@ class TestToken:
     def teardown_class(cls):
         print('\rFin des tests')
 
+    def setup_method(self, method):
+        self.length = len(f'    Début du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+        print(f'\r    Début du test : {method.__name__}')
+
+    def teardown_method(self, method):
+        print(f'\r    Fin du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+
     @pytest.fixture(autouse=True)
     def setup(self):
         'Initiate the database with an user'
@@ -25,15 +34,6 @@ class TestToken:
             'can_data_be_shared': C.can_data_be_shared,
         }
         C.client.post(C.user_url, self.user_data)
-
-    def setup_method(self, method):
-        self.length = len(f'    Début du test : {method.__name__}')
-        print('\r' + '-' * self.length)
-        print(f'\r    Début du test : {method.__name__}')
-
-    def teardown_method(self, method):
-        print(f'\r    Fin du test : {method.__name__}')
-        print('\r' + '-' * self.length)
 
     def test_token_success(self):
         # Obtain token
