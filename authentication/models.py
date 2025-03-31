@@ -13,8 +13,6 @@ class User(AbstractUser):
     can_be_contacted = models.BooleanField(blank=False, null=False)
     can_data_be_shared = models.BooleanField(blank=False, null=False)
 
-    REQUIRED_FIELDS = ['birthday', 'can_be_contacted', 'can_data_be_shared']
-
     def __str__(self):
         return self.username
 
