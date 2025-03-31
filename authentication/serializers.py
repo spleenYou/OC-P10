@@ -21,13 +21,15 @@ class UserCreateSerializer(serializers.ModelSerializer):
         }
 
     def validate_birthday(self, value):
-        # Check if the user is at least 15 years old (365*15 + 3 for leap years)
+        'Check if the user is at least 15 years old (365*15 + 3 for leap years)'
+
         if value > (datetime.datetime.now() - datetime.timedelta(days=5475)).date():
             raise serializers.ValidationError('You are too young')
         return value
 
     def validate(self, attrs):
-        # Check if both passwords send are same
+        'Check if both passwords send are same'
+
         if attrs['password1'] != attrs['password2']:
             raise serializers.ValidationError(
                 {
@@ -37,7 +39,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Create user with all data
         user = User.objects.create(
             username=validated_data['username'],
             birthday=validated_data['birthday'],
