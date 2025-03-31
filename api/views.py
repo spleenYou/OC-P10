@@ -20,8 +20,6 @@ class IsAuthenticatedAndInProject(BasePermission):
     message = 'Vous ne faites pas partie du projet'
 
     def has_permission(self, request, view):
-        print(view.action)
-
         if view.action == 'list':
             if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
                 if isinstance(view, CommentViewset):

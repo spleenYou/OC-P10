@@ -15,7 +15,11 @@ class IsAuthenticatedForActionsExceptCreate(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
             return True
+        print(view)
         return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user
 
 
 class UserViewset(ModelViewSet):
@@ -46,16 +50,16 @@ class UserViewset(ModelViewSet):
         serializer = self.get_serializer(product)
         return Response(serializer.data)
 
-    def check_permission(self, product, user):
-        if product != user:
-            return Response({'detail': 'Vous ne pouvez modifier que votre profil'}, status=status.HTTP_401_UNAUTHORIZED)
-        return None
+    # def check_permission(self, product, user):
+    #     if product != user:
+    #         return Response({'detail': 'Vous ne pouvez modifier que votre profil'}, status=status.HTTP_401_UNAUTHORIZED)
+    #     return None
 
     def update(self, request, pk=None):
         product = self.get_object()
-        permission_error = self.check_permission(product, request.user)
-        if permission_error:
-            return permission_error
+        # permission_error = self.check_permission(product, request.user)
+        # if permission_error:
+        #     return permission_error
         serializer = self.get_serializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -65,9 +69,9 @@ class UserViewset(ModelViewSet):
 
     def partial_update(self, request, pk=None):
         product = self.get_object()
-        permission_error = self.check_permission(product, request.user)
-        if permission_error:
-            return permission_error
+        # permission_error = self.check_permission(product, request.user)
+        # if permission_error:
+        #     return permission_error
         serializer = self.get_serializer(product, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -77,8 +81,8 @@ class UserViewset(ModelViewSet):
 
     def destroy(self, request, pk=None):
         product = self.get_object()
-        permission_error = self.check_permission(product, request.user)
-        if permission_error:
-            return permission_error
+        # permission_error = self.check_permission(product, request.user)
+        # if permission_error:
+        #     return permission_error
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
