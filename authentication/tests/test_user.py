@@ -16,12 +16,19 @@ def user_data():
     }
 
 
+@pytest.fixture
+def user2_data(user_data):
+    data = user_data.copy()
+    data['username'] = 'client2-test'
+    return data
+
+
 def birthday_formated(birthday=C.birthday):
     return birthday.strftime('%Y-%m-%d')
 
 
-def token_obtain():
-    tokens = C.client.post(f"{C.user_url}login/", {'username': C.username, 'password': C.password})
+def token_obtain(user):
+    tokens = C.client.post(f"{C.user_url}login/", {'username': user['username'], 'password': user['password1']})
     return tokens.json()['access']
 
 
@@ -96,7 +103,7 @@ def test_user_details(user_data):
     response = C.client.get(
         C.user_url + str(user_id) + "/",
         headers={
-            'Authorization': f'Bearer {token_obtain()}'
+            'Authorization': f'Bearer {token_obtain(user_data)}'
         }
     )
     assert response.status_code == 200
@@ -119,7 +126,30 @@ def test_user_update(user_data):
         data=json.dumps({'username': 'testeur'}),
         headers={
             'content-type': 'application/json',
-            'Authorization': f'Bearer {token_obtain()}'
+            'Authorization': f'Bearer {token_obtain(user_data)}'
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        'username': 'testeur',
+        'birthday': birthday_formated(),
+        'can_be_contacted': user_data['can_be_contacted'],
+        'can_data_be_shared': user_data['can_data_be_shared'],
+        'projects_created': []
+    }
+
+
+@pytest.mark.django_db
+def test_user_update_by_another_user_failed(user_data, user2_data):
+    user = C.client.post(C.user_url, user_data)
+    C.client.post(C.user_url, user2_data)
+    user_id = user.json()['id']
+    response = C.client.patch(
+        C.user_url + str(user_id) + "/",
+        data=json.dumps({'username': 'testeur'}),
+        headers={
+            'content-type': 'application/json',
+            'Authorization': f'Bearer {token_obtain(user2_data)}'
         }
     )
     assert response.status_code == 200

@@ -101,7 +101,8 @@ def test_issue(user_data):
         },
         headers={'Authorization': f'Bearer {token_obtain(user2_response.json())}'}
     )
-    assert response == 401
+    assert response.status_code == 401
     expected_response = {
-        'detail': 'Vous ne faites pas partie du projet'
+        'detail': "Vous n'êtes pas affecté au projet"
     }
+    assert response.json() == expected_response
