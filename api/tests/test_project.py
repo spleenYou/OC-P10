@@ -30,15 +30,8 @@ class TestProject:
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.user1_data = {
-            'username': C.username,
-            'password1': C.password,
-            'password2': C.password,
-            'birthday': C.birthday,
-            'can_be_contacted': C.can_be_contacted,
-            'can_data_be_shared': C.can_data_be_shared,
-        }
-        self.user1 = C.client.post(C.user_url, self.user1_data)
+        self.user1 = C.client.post(C.user_url, C.user1_data)
+        self.user2 = C.client.post(C.user_url, C.user2_data)
         user = User.objects.get(pk=self.user1.json()['id'])
         self.projects = []
         self.projects.append(
@@ -77,16 +70,6 @@ class TestProject:
     def birthday_formated(self, birthday=C.birthday):
         return birthday.strftime('%Y-%m-%d')
 
-    def get_token_access(self, user_data):
-        tokens = C.client.post(
-            f"{C.user_url}login/",
-            {
-                'username': user_data['username'],
-                'password': user_data['password1'],
-            }
-        )
-        return tokens.json()['access']
-
     def format_datetime(self, value):
         return (value + datetime.timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S.%f+02:00')
 
@@ -104,6 +87,16 @@ class TestProject:
                 'project_type': project.project_type
             } for project in projects
         ]
+
+    def get_token_access(self, user_data):
+        tokens = C.client.post(
+            f"{C.user_url}login/",
+            {
+                'username': user_data['username'],
+                'password': user_data['password1'],
+            }
+        )
+        return tokens.json()['access']
 
     def test_project_add_fail(self):
         self.user1
@@ -126,32 +119,9 @@ class TestProject:
                 'description': 'test',
                 'project_type': 'Android'
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'}
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
         )
         assert project_response.status_code == 201
-
-    def test_project_update(self):
-        project = self.projects[0]
-        project_id = project.id
-        token = self.get_token_access(self.user1_data)
-        response_update = C.client.patch(
-            f'{C.api_url}project/{project_id}/',
-            data=json.dumps({'description': 'changement de description'}),
-            headers={
-                'content-type': 'application/json',
-                'Authorization': f'Bearer {token}'
-            }
-        )
-        assert response_update.status_code == 200
-        expected_response = {
-            'id': project_id,
-            'title': response_update.json()['title'],
-            'description': 'changement de description',
-            'author': response_update.json()['author'],
-            'project_type': response_update.json()['project_type'],
-            'date_created': response_update.json()['date_created'],
-        }
-        assert response_update.json() == expected_response
 
     def test_project_update_fail(self):
         project = self.projects[0]
@@ -169,12 +139,51 @@ class TestProject:
         }
         assert response_update.json() == expected_response
 
+    def test_project_update_by_another_user(self):
+        project = self.projects[0]
+        project_id = project.id
+        response_update = C.client.patch(
+            f'{C.api_url}project/{project_id}/',
+            data=json.dumps({'description': 'changement de description'}),
+            headers={
+                'content-type': 'application/json',
+                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
+            }
+        )
+        assert response_update.status_code == 401
+        expected_response = {
+            'detail': "Vous ne faites pas partie du projet."
+        }
+        assert response_update.json() == expected_response
+
+    def test_project_update(self):
+        project = self.projects[0]
+        project_id = project.id
+        response_update = C.client.patch(
+            f'{C.api_url}project/{project_id}/',
+            data=json.dumps({'description': 'changement de description'}),
+            headers={
+                'content-type': 'application/json',
+                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
+            }
+        )
+        assert response_update.status_code == 200
+        expected_response = {
+            'id': project_id,
+            'title': response_update.json()['title'],
+            'description': 'changement de description',
+            'author': response_update.json()['author'],
+            'project_type': response_update.json()['project_type'],
+            'date_created': response_update.json()['date_created'],
+        }
+        assert response_update.json() == expected_response
+
     def test_project_list(self):
         url = reverse_lazy('project-list')
         response = C.client.get(
             url,
             headers={
-                'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'
+                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
             }
         )
         assert response.status_code == 200
@@ -189,7 +198,7 @@ class TestProject:
         response = C.client.get(
             f'{C.api_url}project/1/',
             headers={
-                'Authorization': f'Bearer {self.get_token_access(self.user1_data)}'
+                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
             }
         )
         assert response.status_code == 200
@@ -214,3 +223,22 @@ class TestProject:
             'detail': "Informations d'authentification non fournies."
         }
         assert response.json() == expected_response
+
+    def test_project_delete_fail(self):
+        response = C.client.delete(
+            f'{C.api_url}project/1/',
+        )
+        assert response.status_code == 401
+        expected_response = {
+            'detail': "Informations d'authentification non fournies."
+        }
+        assert response.json() == expected_response
+
+    def test_project_delete(self):
+        response = C.client.delete(
+            f'{C.api_url}project/1/',
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
+            }
+        )
+        assert response.status_code == 204
