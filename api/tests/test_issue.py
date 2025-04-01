@@ -188,7 +188,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Seul l'auteur peut effectuer une mise à jour"
+            'detail': "Vous ne pouvez pas effectuer la mise à jour"
         }
         assert response.json() == expected_response
 
@@ -263,7 +263,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Seul l'auteur peut effectuer une suppression"
+            'detail': "Vous ne pouvez pas effectuer la suppression"
         }
         assert response.json() == expected_response
 

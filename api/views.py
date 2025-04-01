@@ -20,22 +20,31 @@ class IsAuthenticatedAndInProject(BasePermission):
     message = 'Vous ne faites pas partie du projet'
 
     def has_permission(self, request, view):
-        if view.action == 'create':
-            if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
-                return (
-                    request.user == Project.objects.get(pk=request.POST['project']).author or
-                    request.user in list(
-                        contributor.user for contributor in Contributor.objects.filter(project=request.POST['project'])
+        if request.user.is_authenticated:
+            if view.action == 'create':
+                if isinstance(view, ContributorViewset):
+                    if not Project.objects.filter(pk=request.POST['project']):
+                        self.message = 'Le projet est inexistant'
+                        return False
+                    self.message = "Vous êtes déjà l'auteur du projet"
+                    return request.user != Project.objects.get(pk=request.POST['project']).author
+                elif isinstance(view, ProjectViewset):
+                    return True
+                else:
+                    contributors = Contributor.objects.filter(project=request.POST['project'])
+                    return (
+                        request.user == Project.objects.get(pk=request.POST['project']).author or
+                        request.user in list(
+                            contributor.user for contributor in contributors
+                        )
                     )
-                )
-            return True
-        if view.action == 'list':
-            if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
-                if isinstance(view, CommentViewset):
-                    self.message = 'Impossible de lister les commentaires'
-                elif isinstance(view, IssueViewset):
-                    self.message = 'Impossible de lister les questions'
-                return False
+            if view.action == 'list':
+                if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
+                    if isinstance(view, CommentViewset):
+                        self.message = 'Impossible de lister les commentaires'
+                    elif isinstance(view, IssueViewset):
+                        self.message = 'Impossible de lister les questions'
+                    return False
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
@@ -46,11 +55,13 @@ class IsAuthenticatedAndInProject(BasePermission):
         if view.action == 'retrieve':
             return request.user in self.contributor_list(obj) or request.user == obj.author
         if view.action == 'update' or view.action == 'partial_update':
-            self.message = "Seul l'auteur peut effectuer une mise à jour"
+            self.message = "Vous ne pouvez pas effectuer la mise à jour"
             return request.user == obj.author
         if view.action == 'destroy':
-            self.message = "Seul l'auteur peut effectuer une suppression"
-            if isinstance(view, ProjectViewset):
+            self.message = "Vous ne pouvez pas effectuer la suppression"
+            if isinstance(view, ContributorViewset):
+                return request.user == obj.user
+            elif isinstance(view, ProjectViewset):
                 return request.user == obj.author
             else:
                 return request.user in self.contributor_list(project) or request.user == obj.author

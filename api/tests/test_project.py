@@ -141,9 +141,8 @@ class TestProject:
 
     def test_project_update_by_another_user(self):
         project = self.projects[0]
-        project_id = project.id
         response_update = C.client.patch(
-            f'{C.api_url}project/{project_id}/',
+            f'{C.api_url}project/{project.id}/',
             data=json.dumps({'description': 'changement de description'}),
             headers={
                 'content-type': 'application/json',
@@ -152,7 +151,7 @@ class TestProject:
         )
         assert response_update.status_code == 403
         expected_response = {
-            'detail': "Seul l'auteur peut effectuer une mise à jour"
+            'detail': "Vous ne pouvez pas effectuer la mise à jour"
         }
         assert response_update.json() == expected_response
 
@@ -267,7 +266,7 @@ class TestProject:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Seul l'auteur peut effectuer une suppression"
+            'detail': "Vous ne pouvez pas effectuer la suppression"
         }
         assert response.json() == expected_response
 

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.core.exceptions import ValidationError
 
 
 class Contributor(models.Model):
@@ -16,14 +15,6 @@ class Contributor(models.Model):
         related_name='projects',
         verbose_name='Projet',
     )
-
-    def clean(self):
-        if self.project.author == self.user:
-            raise ValidationError("L'auteur du projet ne peut pas être ajouté aux contributeurs")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ('user', 'project')

@@ -20,3 +20,5 @@ user1_data = {
 }
 user2_data = user1_data.copy()
 user2_data['username'] = 'Client2-test'
+user3_data = user1_data.copy()
+user3_data['username'] = 'Client3-test'
