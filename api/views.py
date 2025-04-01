@@ -10,7 +10,7 @@ from api.serializers import (
     CommentSerializer,
     CommentDetailSerializer,
 )
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -30,25 +30,34 @@ class IsAuthenticatedAndInProject(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset):
-            return True
-        elif isinstance(view, CommentViewset):
-            author = obj.issue.project.author
+        if isinstance(view, CommentViewset):
             project = obj.issue.project
         elif isinstance(view, IssueViewset):
-            author = obj.project.author
             project = obj.project
+        if view.action == 'retrieve':
+            return request.user in self.contributor_list(project) or request.user == obj.author
+        if view.action == 'update' or view.action == 'partial_update':
+            self.message = "Seul l'auteur peut effectuer une mise à jour"
+            return request.user == obj.author
+        if view.action == 'destroy':
+            self.message = "Seul l'auteur peut effectuer une suppression"
+            if isinstance(view, ProjectViewset):
+                return request.user == obj.author
+            else:
+                return request.user in self.contributor_list(project) or request.user == obj.author
+
+    def contributor_list(self, project=None):
         contibutor_list = Contributor.objects.filter(project=project)
         contibutor_list = (contributor.user for contributor in contibutor_list)
-        contibutor_list = list(chain(contibutor_list, [author]))
-        return request.user in contibutor_list
+        contibutor_list = list(chain(contibutor_list, [project.author]))
+        return contibutor_list
 
 
 class ProjectViewset(ModelViewSet):
 
     serializer_class = ProjectSerializer
     detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndInProject]
 
     def get_queryset(self):
         return Project.objects.all()
@@ -70,7 +79,7 @@ class ProjectViewset(ModelViewSet):
 class ContributorViewset(ModelViewSet):
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndInProject]
 
     def get_queryset(self):
         return Contributor.objects.all()
