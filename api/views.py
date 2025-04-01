@@ -34,7 +34,7 @@ class IsAuthenticatedAndInProject(BasePermission):
                 if isinstance(view, CommentViewset):
                     self.message = 'Impossible de lister les commentaires'
                 elif isinstance(view, IssueViewset):
-                    self.message = 'Impossible de lister les remarques'
+                    self.message = 'Impossible de lister les questions'
                 return False
         return request.user.is_authenticated
 
