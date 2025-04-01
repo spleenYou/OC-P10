@@ -35,7 +35,7 @@ class IsAuthenticatedAndInProject(BasePermission):
         elif isinstance(view, IssueViewset):
             project = obj.project
         if view.action == 'retrieve':
-            return request.user in self.contributor_list(project) or request.user == obj.author
+            return request.user in self.contributor_list(obj) or request.user == obj.author
         if view.action == 'update' or view.action == 'partial_update':
             self.message = "Seul l'auteur peut effectuer une mise à jour"
             return request.user == obj.author

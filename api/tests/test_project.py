@@ -150,9 +150,9 @@ class TestProject:
                 'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
             }
         )
-        assert response_update.status_code == 401
+        assert response_update.status_code == 403
         expected_response = {
-            'detail': "Vous ne faites pas partie du projet."
+            'detail': "Seul l'auteur peut effectuer une mise à jour"
         }
         assert response_update.json() == expected_response
 
@@ -189,6 +189,17 @@ class TestProject:
         assert response.status_code == 200
         assert response.json()['results'] == self.get_project_list(self.projects)
 
+    def test_project_list_by_user_not_in_project(self):
+        url = reverse_lazy('project-list')
+        response = C.client.get(
+            url,
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
+            }
+        )
+        assert response.status_code == 200
+        assert response.json()['results'] == self.get_project_list(self.projects)
+
     def test_project_list_fail(self):
         url = reverse_lazy('project-list')
         response = C.client.get(url)
@@ -214,6 +225,19 @@ class TestProject:
         }
         assert response.json() == expected_response
 
+    def test_project_detail_by_user_not_in_project(self):
+        response = C.client.get(
+            f'{C.api_url}project/1/',
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
+            }
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Vous ne faites pas partie du projet'
+        }
+        assert response.json() == expected_response
+
     def test_project_detail_fail(self):
         response = C.client.get(
             f'{C.api_url}project/1/',
@@ -231,6 +255,19 @@ class TestProject:
         assert response.status_code == 401
         expected_response = {
             'detail': "Informations d'authentification non fournies."
+        }
+        assert response.json() == expected_response
+
+    def test_project_delete_by_user_not_in_project(self):
+        response = C.client.delete(
+            f'{C.api_url}project/1/',
+            headers={
+                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
+            }
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': "Seul l'auteur peut effectuer une suppression"
         }
         assert response.json() == expected_response
 
