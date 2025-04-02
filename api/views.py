@@ -1,6 +1,7 @@
 from itertools import chain
 from rest_framework.viewsets import ModelViewSet
 from api.models import Project, Contributor, Issue, Comment
+from authentication.models import User
 from api.serializers import (
     ProjectSerializer,
     ProjectDetailSerializer,
@@ -23,11 +24,14 @@ class IsAuthenticatedAndInProject(BasePermission):
         if request.user.is_authenticated:
             if view.action == 'create':
                 if isinstance(view, ContributorViewset):
-                    if not Project.objects.filter(pk=request.POST['project']):
-                        self.message = 'Le projet est inexistant'
+                    if (not Project.objects.filter(pk=request.POST['project']) or
+                            not User.objects.filter(pk=request.POST['user'])):
+                        self.message = 'Ajout impossible'
                         return False
                     self.message = "Vous êtes déjà l'auteur du projet"
-                    return request.user != Project.objects.get(pk=request.POST['project']).author
+                    author = Project.objects.get(pk=request.POST['project']).author
+                    return request.user != author and request.POST['user'] != str(author.id)
+
                 elif isinstance(view, ProjectViewset):
                     return True
                 else:
@@ -56,6 +60,10 @@ class IsAuthenticatedAndInProject(BasePermission):
             return request.user in self.contributor_list(obj) or request.user == obj.author
         if view.action == 'update' or view.action == 'partial_update':
             self.message = "Vous ne pouvez pas effectuer la mise à jour"
+            if isinstance(view, ContributorViewset):
+                # Contributor are not updatable, you're in project or not
+                self.message = 'Pas de mise à jour possible sur les contributeurs'
+                return False
             return request.user == obj.author
         if view.action == 'destroy':
             self.message = "Vous ne pouvez pas effectuer la suppression"
