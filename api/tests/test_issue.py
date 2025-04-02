@@ -81,7 +81,7 @@ class TestIssue:
         }
         assert response.json() == expected_value
 
-    def test_issue_add_by_user_not_in_project(self):
+    def test_issue_add_by_user_not_contributor(self):
         response = C.client.post(
             f'{C.api_url}issue/',
             data={
@@ -154,9 +154,7 @@ class TestIssue:
         )
         assert response.status_code == 400
         expected_value = {
-            'title': ['Ce champ est obligatoire.'],
-            'description': ['Ce champ est obligatoire.'],
-            'tag': ['Ce champ est obligatoire.'],
+            'detail': 'Création impossible'
         }
         assert response.json() == expected_value
 
@@ -169,11 +167,11 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Impossible de lister les questions"
+            'detail': "Impossible de lister"
         }
         assert response.json() == expected_response
 
-    def test_issue_update_by_user_not_in_project(self):
+    def test_issue_update_by_user_not_contributor(self):
         response = C.client.patch(
             f'{C.api_url}issue/1/',
             json.dumps(
@@ -188,7 +186,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous ne pouvez pas effectuer la mise à jour"
+            'detail': "Vous ne faites pas partie du projet"
         }
         assert response.json() == expected_response
 
@@ -263,7 +261,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous ne pouvez pas effectuer la suppression"
+            'detail': "Vous ne faites pas partie du projet"
         }
         assert response.json() == expected_response
 

@@ -37,7 +37,7 @@ class TestContributor:
                 'description': 'Description du projet 1',
                 'project_type': "front-end",
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         if 'update' in self.method:
             self.project2 = C.client.post(
@@ -47,7 +47,7 @@ class TestContributor:
                     'description': 'Description du projet 2',
                     'project_type': "back-end",
                 },
-                headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+                HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
             )
         self.contributor = C.client.post(
             f'{C.api_url}contributor/',
@@ -55,7 +55,7 @@ class TestContributor:
                 'user': self.user3.json()['id'],
                 'project': self.project.json()['id']
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user3_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user3_data)}',
         )
 
     def get_token_access(self, user):
@@ -80,6 +80,23 @@ class TestContributor:
             'next': None,
             'previous': None,
             'results': [
+                {
+                    'project': {
+                        'id': self.project.json()['id'],
+                        'author': {
+                            'id': self.user1.json()['id'],
+                            'username': self.user1.json()['username']
+                        },
+                        'title': self.project.json()['title'],
+                        'project_type': self.project.json()['project_type'],
+                        'date_created': self.project.json()['date_created'],
+                        'description': self.project.json()['description'],
+                    },
+                    'user': {
+                        'id': self.user1.json()['id'],
+                        'username': self.user1.json()['username']
+                    }
+                },
                 {
                     'project': {
                         'id': self.project.json()['id'],
@@ -166,9 +183,9 @@ class TestContributor:
             },
             headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
         )
-        assert response.status_code == 403
+        assert response.status_code == 400
         expected_response = {
-            'detail': 'Ajout impossible'
+            'detail': 'Création impossible'
         }
         assert response.json() == expected_response
 
@@ -183,46 +200,49 @@ class TestContributor:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': 'Ajout impossible'
+            'detail': "Création impossible"
         }
         assert response.json() == expected_response
 
     def test_contributor_update_fail(self):
         contributor = Contributor.objects.all()[0]
-        delete_response = C.client.patch(
-            f"{C.api_url}contributor/{contributor.id}/",
-            data=json.dumps(
-                {
-                    'user': self.user2.json()['id']
-                },
-            ),
-            headers={
-                'content-type': 'application/json',
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
-            }
+        response = C.client.patch(
+            f"/api/contributor/{contributor.id}/",
+            data=json.dumps({'user': ''}),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
         )
-        assert delete_response.status_code == 403
+        assert response.status_code == 403
         expected_response = {
-            'detail': 'Pas de mise à jour possible sur les contributeurs'
+            'detail': 'Mise à jour impossible'
         }
-        assert delete_response.json() == expected_response
+        assert response.json() == expected_response
 
     def test_contributor_delete_by_another_user_fail(self):
         contributor = Contributor.objects.all()[0]
-        delete_response = C.client.delete(
+        response = C.client.delete(
             f"{C.api_url}contributor/{contributor.id}/",
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
             )
-        assert delete_response.status_code == 403
+        assert response.status_code == 403
         expected_response = {
-            'detail': 'Vous ne pouvez pas effectuer la suppression'
+            'detail': 'Suppression impossible'
         }
-        assert delete_response.json() == expected_response
+        assert response.json() == expected_response
 
     def test_contributor_delete(self):
         contributor = Contributor.objects.all()[0]
-        delete_response = C.client.delete(
+        response = C.client.delete(
             f"{C.api_url}contributor/{contributor.id}/",
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user3_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
             )
-        assert delete_response.status_code == 204
+        assert response.status_code == 204
+
+    def test_contributor_delete_by_deleting_project(self):
+        response = C.client.delete(
+            f"{C.api_url}project/{self.project.json()['id']}/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            )
+        assert response.status_code == 204
+        contributor = Contributor.objects.all()
+        assert len(contributor) == 0

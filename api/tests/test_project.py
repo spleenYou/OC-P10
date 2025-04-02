@@ -151,7 +151,7 @@ class TestProject:
         )
         assert response_update.status_code == 403
         expected_response = {
-            'detail': "Vous ne pouvez pas effectuer la mise à jour"
+            'detail': "Vous devez être l'auteur du projet"
         }
         assert response_update.json() == expected_response
 
@@ -233,7 +233,7 @@ class TestProject:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': 'Vous ne faites pas partie du projet'
+            'detail': "Vous devez être l'auteur du projet"
         }
         assert response.json() == expected_response
 
@@ -266,7 +266,7 @@ class TestProject:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous ne pouvez pas effectuer la suppression"
+            'detail': "Vous devez être l'auteur du projet"
         }
         assert response.json() == expected_response
 

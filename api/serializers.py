@@ -92,9 +92,6 @@ class ContributorSerializer(ModelSerializer):
         ret['project'] = ProjectSerializer(instance.project).data
         return ret
 
-    def create(self, validated_data):
-        return super().create(validated_data)
-
 
 class IssueWithoutProjectSerializer(ModelSerializer):
 
@@ -181,7 +178,6 @@ class CommentSerializer(ModelSerializer):
         model = Comment
         fields = [
             'id',
-            'issue',
             'description',
             'date_created',
         ]
@@ -193,6 +189,7 @@ class CommentSerializer(ModelSerializer):
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
+        validated_data['issue'] = Issue.objects.get(pk=self.context['request'].POST['issue'])
         return super().create(validated_data)
 
 

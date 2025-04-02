@@ -1,7 +1,5 @@
-from itertools import chain
 from rest_framework.viewsets import ModelViewSet
 from api.models import Project, Contributor, Issue, Comment
-from authentication.models import User
 from api.serializers import (
     ProjectSerializer,
     ProjectDetailSerializer,
@@ -11,81 +9,61 @@ from api.serializers import (
     CommentSerializer,
     CommentDetailSerializer,
 )
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
 
-class IsAuthenticatedAndInProject(BasePermission):
+class IsAuthor(BasePermission):
+    message = "Vous devez être l'auteur du projet"
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.author
+
+
+class IsRequestUser(BasePermission):
+    message = "Vous n'êtes pas concerné"
+
+    def has_permission(self, request, view):
+        # Verifier l'interet de != list
+        return str(request.user.id) == request.POST['user'] and view.action != 'list'
+
+
+class IsContributor(BasePermission):
 
     message = 'Vous ne faites pas partie du projet'
 
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            if view.action == 'create':
-                if isinstance(view, ContributorViewset):
-                    if (not Project.objects.filter(pk=request.POST['project']) or
-                            not User.objects.filter(pk=request.POST['user'])):
-                        self.message = 'Ajout impossible'
-                        return False
-                    self.message = "Vous êtes déjà l'auteur du projet"
-                    author = Project.objects.get(pk=request.POST['project']).author
-                    return request.user != author and request.POST['user'] != str(author.id)
-
-                elif isinstance(view, ProjectViewset):
-                    return True
-                else:
-                    contributors = Contributor.objects.filter(project=request.POST['project'])
-                    return (
-                        request.user == Project.objects.get(pk=request.POST['project']).author or
-                        request.user in list(
-                            contributor.user for contributor in contributors
-                        )
-                    )
-            if view.action == 'list':
-                if not (isinstance(view, ContributorViewset) or isinstance(view, ProjectViewset)):
-                    if isinstance(view, CommentViewset):
-                        self.message = 'Impossible de lister les commentaires'
-                    elif isinstance(view, IssueViewset):
-                        self.message = 'Impossible de lister les questions'
-                    return False
-        return request.user.is_authenticated
+        if 'project' in request.data:
+            project = Project.objects.get(pk=request.data['project'])
+            return Contributor.objects.filter(project=project, user=request.user).exists()
+        return True
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(view, CommentViewset):
-            project = obj.issue.project
-        elif isinstance(view, IssueViewset):
-            project = obj.project
-        if view.action == 'retrieve':
-            return request.user in self.contributor_list(obj) or request.user == obj.author
-        if view.action == 'update' or view.action == 'partial_update':
-            self.message = "Vous ne pouvez pas effectuer la mise à jour"
-            if isinstance(view, ContributorViewset):
-                # Contributor are not updatable, you're in project or not
-                self.message = 'Pas de mise à jour possible sur les contributeurs'
-                return False
-            return request.user == obj.author
-        if view.action == 'destroy':
-            self.message = "Vous ne pouvez pas effectuer la suppression"
-            if isinstance(view, ContributorViewset):
-                return request.user == obj.user
-            elif isinstance(view, ProjectViewset):
-                return request.user == obj.author
-            else:
-                return request.user in self.contributor_list(project) or request.user == obj.author
+        return Contributor.objects.filter(project=obj.project, user=request.user).exists()
 
-    def contributor_list(self, project=None):
-        contibutor_list = Contributor.objects.filter(project=project)
-        contibutor_list = (contributor.user for contributor in contibutor_list)
-        contibutor_list = list(chain(contibutor_list, [project.author]))
-        return contibutor_list
+
+class IsNotAllowedToList(BasePermission):
+
+    message = 'Impossible de lister'
+
+    def has_permission(self, request, view):
+        return view.action != 'list'
+
+
+class NoUpdate(BasePermission):
+
+    message = 'Mise à jour impossible'
+
+    def has_permission(self, request, view):
+        return view.action not in ('update', 'partial_update')
 
 
 class ProjectViewset(ModelViewSet):
 
     serializer_class = ProjectSerializer
     detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticatedAndInProject]
+    permission_classes = [IsAuthenticated, IsAuthor]
 
     def get_queryset(self):
         return Project.objects.all()
@@ -96,9 +74,19 @@ class ProjectViewset(ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request):
+        self.permission_classes = [IsAuthenticated]
         serializer = ProjectSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            project = serializer.save()
+            # Add author to contributor automatically
+            contributor = ContributorSerializer(
+                data={
+                    'user': request.user.id,
+                    'project': project.id
+                }
+            )
+            if contributor.is_valid():
+                contributor.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -107,30 +95,37 @@ class ProjectViewset(ModelViewSet):
 class ContributorViewset(ModelViewSet):
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthenticatedAndInProject]
+    permission_classes = [IsAuthenticated, NoUpdate]
 
     def get_queryset(self):
         return Contributor.objects.all()
 
     def create(self, request):
-        serializer = ContributorSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if str(request.user.id) == request.data['user']:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Création impossible'}, status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, pk=None):
-        product = self.get_object()
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        print(f'{request.user} == {Contributor.objects.get(pk=pk).user}')
+        if request.user == Contributor.objects.get(pk=pk).user:
+            product = self.get_object()
+            product.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'detail': 'Suppression impossible'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class IssueViewset(ModelViewSet):
 
     serializer_class = IssueSerializer
     detail_serializer_class = IssueDetailSerializer
-    permission_classes = [IsAuthenticatedAndInProject]
+    permission_classes = [IsAuthenticated, IsNotAllowedToList]
 
     def get_queryset(self):
         return Issue.objects.all()
@@ -141,19 +136,52 @@ class IssueViewset(ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request):
-        serializer = IssueSerializer(data=request.data, context={'request': request})
+        self.permission_classes += [IsContributor]
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        self.permission_classes += [IsContributor]
+        issue = self.get_object()
+        serializer = self.get_serializer(issue)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewset(ModelViewSet):
 
     serializer_class = CommentSerializer
     detail_serializer_class = CommentDetailSerializer
-    permission_classes = [IsAuthenticatedAndInProject]
+    permission_classes = [IsAuthenticated, IsNotAllowedToList]
 
     def get_queryset(self):
         return Comment.objects.all()
@@ -164,15 +192,36 @@ class CommentViewset(ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request):
-        issue = Issue.objects.get(pk=request.data['issue'])
-        contibutor_list = Contributor.objects.filter(project=issue.project)
-        contibutor_list = (contributor.user for contributor in contibutor_list)
-        contibutor_list = list(chain(contibutor_list, [issue.author]))
-        if request.user in contibutor_list:
-            serializer = CommentSerializer(data=request.data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'detail': "Vous n'êtes pas affecté au projet"}, status=status.HTTP_401_UNAUTHORIZED)
+        self.permission_classes += [IsContributor]
+        serializer = CommentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        self.permission_classes += [IsAuthor]
+        product = self.get_object()
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

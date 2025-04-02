@@ -1,108 +1,135 @@
 import pytest
 import CONST as C
-import datetime
-from authentication.models import User
-from api.models import Project, Issue
-
-
-@pytest.fixture
-def user_data():
-    return {
-        'username': C.username,
-        'password1': C.password,
-        'password2': C.password,
-        'birthday': C.birthday,
-        'can_be_contacted': C.can_be_contacted,
-        'can_data_be_shared': C.can_data_be_shared,
-    }
-
-
-def token_obtain(user):
-    tokens = C.client.post(
-        f"{C.user_url}login/",
-        {
-            'username': user['username'],
-            'password': C.password,
-        }
-    )
-    return tokens.json()['access']
-
-
-def format_datetime(value):
-    return (value + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S.%f+01:00')
+# import json
+# from api.models import Comment
 
 
 @pytest.mark.django_db
-def test_issue(user_data):
-    user1_response = C.client.post(C.user_url, user_data)
-    user1 = User.objects.get(pk=user1_response.json()['id'])
-    project_response = C.client.post(
-        f'{C.api_url}project/',
-        data={
-            'title': 'test',
-            'description': 'test',
-            'project_type': 'Android'
-        },
-        headers={'Authorization': f'Bearer {token_obtain(user1_response.json())}'}
-    )
-    project = Project.objects.get(pk=project_response.json()['id'])
-    C.client.post(
-        f'{C.api_url}issue/',
-        data={
-            'project': project.id,
-            'title': 'test',
-            'description': 'test',
-            'status': 'To-Do',
-            'priority': 'LOW',
-            'tag': 'BUG',
-        },
-        headers={'Authorization': f'Bearer {token_obtain(user1_response.json())}'}
-    )
-    data = user_data.copy()
-    data['username'] = 'User2'
-    user2_response = C.client.post(C.user_url, data)
-    issue_response = C.client.post(
+class TestComment:
+
+    @classmethod
+    def setup_class(cls):
+        print('\nDébut des tests pour les commentaires')
+
+    @classmethod
+    def teardown_class(cls):
+        print('\rFin des tests')
+
+    def setup_method(self, method):
+        self.length = len(f'    Début du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+        print(f'\r    Début du test : {method.__name__}')
+
+    def teardown_method(self, method):
+        print(f'\r    Fin du test : {method.__name__}')
+        print('\r' + '-' * self.length)
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.user1 = C.client.post(C.user_url, C.user1_data)
+        self.user2 = C.client.post(C.user_url, C.user2_data)
+        self.project = C.client.post(
+            f'{C.api_url}project/',
+            {
+                'title': 'Projet 1',
+                'description': 'Description du projet 1',
+                'project_type': "front-end",
+            },
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+        )
+        self.issue = C.client.post(
             f'{C.api_url}issue/',
             data={
-                'project': project.id,
+                'project': self.project.json()['id'],
                 'title': 'test',
                 'description': 'test',
                 'status': 'To-Do',
                 'priority': 'LOW',
                 'tag': 'BUG',
             },
-            headers={'Authorization': f'Bearer {token_obtain(user1_response.json())}'}
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
         )
-    issue = Issue.objects.get(pk=issue_response.json()['id'])
+        self.contributor = C.client.post(
+            f'{C.api_url}contributor/',
+            {
+                'user': self.user2.json()['id'],
+                'project': self.project.json()['id']
+            },
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+        )
+        self.comment = C.client.post(
+            f'{C.api_url}comment/',
+            {
+                'issue': self.issue.json()['id'],
+                'description': 'Solution de ouf',
+            },
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+        )
 
-    comment_response = C.client.post(
-        f'{C.api_url}comment/', {
-            'issue': issue.id,
-            'description': 'Description test'
-        },
-        headers={'Authorization': f'Bearer {token_obtain(user1_response.json())}'}
-    )
-    assert comment_response.status_code == 201
-    expected_response = {
-        'id': 1,
-        'issue': issue.id,
-        'description': 'Description test',
-        'date_created': comment_response.json()['date_created'],
-        'author': {
-            'id': user1.id,
-            'username': user1.username
+    def get_token_access(self, user_data):
+        tokens = C.client.post(
+            f"{C.user_url}login/",
+            {
+                'username': user_data['username'],
+                'password': user_data['password1'],
+            }
+        )
+        return tokens.json()['access']
+
+    def test_comment_list_fail(self):
+        response = C.client.get(
+            f'{C.api_url}comment/',
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'},
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Impossible de lister'
         }
-    }
-    assert comment_response.json() == expected_response
-    response = C.client.post(
-        f'{C.api_url}comment/', {
-            'issue': issue.id,
-            'description': 'Description test'
-        },
-        headers={'Authorization': f'Bearer {token_obtain(user2_response.json())}'}
-    )
-    assert response.status_code == 401
-    expected_response = {
-        'detail': "Vous n'êtes pas affecté au projet"
-    }
-    assert response.json() == expected_response
+        assert response.json() == expected_response
+
+    def test_comment_list_by_issue(self):
+        response = C.client.get(
+            f"{C.api_url}issue/{self.issue.json()['id']}/",
+            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'},
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'id': self.issue.json()['id'],
+            'assigned_user': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username'],
+            },
+            'author': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username']
+            },
+            'date_created': self.issue.json()['date_created'],
+            'description': self.issue.json()['description'],
+            'priority': self.issue.json()['priority'],
+            'status': self.issue.json()['status'],
+            'tag': self.issue.json()['tag'],
+            'title': self.issue.json()['title'],
+            'project': {
+                'id': self.project.json()['id'],
+                'author': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username'],
+                },
+                'title': self.project.json()['title'],
+                'description': self.project.json()['description'],
+                'project_type': self.project.json()['project_type'],
+                'date_created': self.project.json()['date_created'],
+            },
+            'comments': [
+                {
+                    'id': self.comment.json()['id'],
+                    'author': {
+                        'id': self.user2.json()['id'],
+                        'username': self.user2.json()['username'],
+                    },
+                    'description': self.comment.json()['description'],
+                    'date_created': self.comment.json()['date_created']
+                }
+            ]
+        }
+        assert response.json() == expected_response
