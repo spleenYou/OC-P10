@@ -238,7 +238,7 @@ class TestIssue:
         }
         assert response.json() == expected_response
 
-    def test_issue_update(self):
+    def test_issue_partial_update(self):
         response = C.client.patch(
             f'{C.api_url}issue/1/',
             json.dumps(
@@ -269,6 +269,53 @@ class TestIssue:
             },
             'title': 'Meilleur titre',
             'description': 'test',
+            'status': 'To-Do',
+            'priority': 'LOW',
+            'tag': 'BUG',
+            'assigned_user': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username']
+            },
+            'date_created': response.json()['date_created'],
+        }
+        assert response.json() == expected_response
+
+    def test_issue_update(self):
+        response = C.client.put(
+            f'{C.api_url}issue/1/',
+            json.dumps(
+                {
+                    'project': self.issue.json()['project']['id'],
+                    'title': 'Meilleur titre',
+                    'description': 'Nouvelle description',
+                    'status': 'To-Do',
+                    'priority': 'LOW',
+                    'tag': 'BUG',
+                },
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'id': response.json()['id'],
+            'author': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username']
+            },
+            'project': {
+                'id': self.project.json()['id'],
+                'title': self.project.json()['title'],
+                'description': self.project.json()['description'],
+                'project_type': self.project.json()['project_type'],
+                'date_created': self.project.json()['date_created'],
+                'author': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username']
+                }
+            },
+            'title': 'Meilleur titre',
+            'description': 'Nouvelle description',
             'status': 'To-Do',
             'priority': 'LOW',
             'tag': 'BUG',
