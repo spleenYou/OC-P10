@@ -102,7 +102,7 @@ class TestProject:
         project = Project.objects.get(pk=1)
         assert self.projects[0].title == project.__str__()
 
-    def test_project_add_fail(self):
+    def test_project_add_by_unregistered_user(self):
         self.user1
         project_response = C.client.post(
             f'{C.api_url}project/',
@@ -113,6 +113,24 @@ class TestProject:
             },
         )
         assert project_response.status_code == 401
+
+    def test_project_add_fail(self):
+        self.user1
+        response = C.client.post(
+            f'{C.api_url}project/',
+            data={
+                'title': 'test',
+                'description': 'test',
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'project_type': [
+                'Ce champ est obligatoire.',
+            ],
+        }
+        assert response.json() == expected_response
 
     def test_project_add(self):
         self.user1
@@ -127,7 +145,7 @@ class TestProject:
         )
         assert project_response.status_code == 201
 
-    def test_project_update_fail(self):
+    def test_project_partial_update_fail(self):
         project = self.projects[0]
         project_id = project.id
         response_update = C.client.patch(
@@ -141,7 +159,7 @@ class TestProject:
         }
         assert response_update.json() == expected_response
 
-    def test_project_update_by_another_user(self):
+    def test_project_partial_update_by_another_user(self):
         project = self.projects[0]
         response_update = C.client.patch(
             f'{C.api_url}project/{project.id}/',
@@ -155,7 +173,7 @@ class TestProject:
         }
         assert response_update.json() == expected_response
 
-    def test_project_update(self):
+    def test_project_partial_update(self):
         project = self.projects[0]
         project_id = project.id
         response_update = C.client.patch(

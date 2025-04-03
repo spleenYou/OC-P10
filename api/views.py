@@ -7,7 +7,6 @@ from api.serializers import (
     IssueSerializer,
     IssueDetailSerializer,
     CommentSerializer,
-    CommentDetailSerializer,
 )
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
@@ -178,15 +177,9 @@ class IssueViewset(ModelViewSet):
 class CommentViewset(ModelViewSet):
 
     serializer_class = CommentSerializer
-    detail_serializer_class = CommentDetailSerializer
 
     def get_queryset(self):
         return Comment.objects.all()
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return self.detail_serializer_class
-        return super().get_serializer_class()
 
     def get_permissions(self):
         permission_classes = [IsAuthenticated, IsNotAllowedToList]

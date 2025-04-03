@@ -191,19 +191,3 @@ class CommentSerializer(ModelSerializer):
         validated_data['author'] = self.context['request'].user
         validated_data['issue'] = Issue.objects.get(pk=self.context['request'].POST['issue'])
         return super().create(validated_data)
-
-
-class CommentDetailSerializer(ModelSerializer):
-
-    author = UserSerializer()
-    issue = IssueSerializer()
-
-    class Meta:
-        model = Comment
-        fields = [
-            'id',
-            'author',
-            'issue',
-            'description',
-            'date_created',
-        ]

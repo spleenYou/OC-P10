@@ -203,9 +203,23 @@ class TestContributor:
         }
         assert response.json() == expected_response
 
-    def test_contributor_update_fail(self):
+    def test_contributor_partial_update_fail(self):
         contributor = Contributor.objects.all()[0]
         response = C.client.patch(
+            f"/api/contributor/{contributor.id}/",
+            data={'user': ''},
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/octet-stream',
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Mise à jour impossible'
+        }
+        assert response.json() == expected_response
+
+    def test_contributor_update_fail(self):
+        contributor = Contributor.objects.all()[0]
+        response = C.client.put(
             f"/api/contributor/{contributor.id}/",
             data={'user': ''},
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',

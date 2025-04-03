@@ -170,7 +170,7 @@ class TestIssue:
         }
         assert response.json() == expected_response
 
-    def test_issue_update_by_user_not_contributor(self):
+    def test_issue_partial_update_by_user_not_contributor(self):
         response = C.client.patch(
             f'{C.api_url}issue/1/',
             json.dumps(
@@ -187,19 +187,54 @@ class TestIssue:
         }
         assert response.json() == expected_response
 
-    def test_issue_update_by_author_not_logged(self):
+    def test_issue_partial_update_fail(self):
         response = C.client.patch(
+            f'{C.api_url}issue/1/',
+            json.dumps(
+                {
+                    'priority': 'Issue 3',
+                },
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'detail': "Mise à jour impossible"
+        }
+        assert response.json() == expected_response
+
+    def test_issue_update_fail(self):
+        response = C.client.put(
+            f'{C.api_url}issue/1/',
+            json.dumps(
+                {
+                    'priority': 'Issue 3',
+                },
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'detail': "Mise à jour impossible"
+        }
+        assert response.json() == expected_response
+
+    def test_issue_update_by_user_not_contributor(self):
+        response = C.client.put(
             f'{C.api_url}issue/1/',
             json.dumps(
                 {
                     'title': 'Meilleur titre',
                 },
             ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
             content_type='application/json',
         )
-        assert response.status_code == 401
+        assert response.status_code == 403
         expected_response = {
-            'detail': "Informations d'authentification non fournies."
+            'detail': "Vous devez être l'auteur"
         }
         assert response.json() == expected_response
 
