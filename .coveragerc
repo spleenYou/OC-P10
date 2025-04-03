@@ -1,2 +1,2 @@
 [run]
-omit = */tests/*, SoftDesk/*, manage.py
+omit = */tests/*, SoftDesk/*, */admin.py, manage.py

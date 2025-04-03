@@ -2,6 +2,7 @@ import pytest
 import CONST as C
 import datetime
 import json
+from authentication.models import User
 
 
 @pytest.mark.django_db
@@ -67,6 +68,9 @@ class TestUser:
         if not self.user1:
             self.user1 = C.client.post(C.user_url, self.user1_data)
         return self.user1
+
+    def test_user_return_str(self):
+        assert self.get_user1().json()['username'] == User.objects.get(pk=1).username
 
     def test_create_user_missing_fields_failed(self):
         data = self.user1_data.copy()
