@@ -229,7 +229,7 @@ class TestComment:
         }
         assert response.json() == expected_response
 
-    def test_comment_partial_update_fail(self):  # A debug
+    def test_comment_partial_update_fail(self):
         comment = Comment.objects.all()[0]
         response = C.client.patch(
             f"{C.api_url}comment/{comment.id}/",
@@ -268,6 +268,48 @@ class TestComment:
             'description': 'Nouveau commentaire',
             'date_created': response.json()['date_created'],
             'id': response.json()['id']
+        }
+        assert response.json() == expected_response
+
+    def test_comment_update_fail(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.put(
+            f"{C.api_url}comment/{comment.id}/",
+            data=json.dumps(
+                {
+                    'description': None,
+                }
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'detail': 'Mise à jour impossible'
+        }
+        assert response.json() == expected_response
+
+    def test_comment_update(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.put(
+            f"{C.api_url}comment/{comment.id}/",
+            data=json.dumps(
+                {
+                    'description': 'Nouvelle description',
+                }
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'author': {
+                'id': self.user2.json()['id'],
+                'username': self.user2.json()['username'],
+            },
+            'description': 'Nouvelle description',
+            'date_created': self.comment.json()['date_created'],
+            'id': self.comment.json()['id'],
         }
         assert response.json() == expected_response
 
