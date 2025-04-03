@@ -1,7 +1,7 @@
 import pytest
 import CONST as C
-# import json
-# from api.models import Comment
+import json
+from api.models import Comment
 
 
 @pytest.mark.django_db
@@ -28,6 +28,7 @@ class TestComment:
     def setup(self):
         self.user1 = C.client.post(C.user_url, C.user1_data)
         self.user2 = C.client.post(C.user_url, C.user2_data)
+        self.user3 = C.client.post(C.user_url, C.user3_data)
         self.project = C.client.post(
             f'{C.api_url}project/',
             {
@@ -131,5 +132,104 @@ class TestComment:
                     'date_created': self.comment.json()['date_created']
                 }
             ]
+        }
+        assert response.json() == expected_response
+
+    def test_comment_add(self):
+        response = C.client.post(
+            f'{C.api_url}comment/',
+            data={
+                'issue': self.issue.json()['id'],
+                'description': 'Nouveau comment'
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 201
+        expected_response = {
+            'author': {
+                'id': self.user2.json()['id'],
+                'username': self.user2.json()['username'],
+            },
+            'description': 'Nouveau comment',
+            'id': response.json()['id'],
+            'date_created': response.json()['date_created']
+        }
+        assert response.json() == expected_response
+
+    def test_comment_add_non_existent_issue_fail(self):
+        response = C.client.post(
+            f'{C.api_url}comment/',
+            data={
+                'issue': 10,
+                'description': 'Nouveau comment'
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Création impossible'
+        }
+        assert response.json() == expected_response
+
+    def test_comment_add_non_contributor_user_fail(self):
+        response = C.client.post(
+            f'{C.api_url}comment/',
+            data={
+                'issue': self.issue.json()['id'],
+                'description': 'Nouveau comment'
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user3_data)}',
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Vous ne faites pas partie du projet'
+        }
+        assert response.json() == expected_response
+
+    def test_comment_update(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.patch(
+            f"{C.api_url}comment/{comment.id}/",
+            data=json.dumps(
+                {
+                    'description': 'Nouveau commentaire',
+                }
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'author': {
+                'id': self.user2.json()['id'],
+                'username': self.user2.json()['username'],
+            },
+            'description': 'Nouveau commentaire',
+            'date_created': response.json()['date_created'],
+            'id': response.json()['id']
+        }
+        assert response.json() == expected_response
+
+    def test_comment_update_not_by_author(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.patch(
+            f"{C.api_url}comment/{comment.id}/",
+            data=json.dumps(
+                {
+                    'description': 'Nouveau commentaire',
+                }
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'author': {
+                'id': self.user2.json()['id'],
+                'username': self.user2.json()['username'],
+            },
+            'description': 'Nouveau commentaire',
+            'date_created': response.json()['date_created'],
+            'id': response.json()['id']
         }
         assert response.json() == expected_response

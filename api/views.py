@@ -26,13 +26,21 @@ class IsContributor(BasePermission):
     message = 'Vous ne faites pas partie du projet'
 
     def has_permission(self, request, view):
-        if 'project' in request.data:
-            project = Project.objects.get(pk=request.data['project'])
+        if view.action == 'create':
+            if 'issue' in request.data:
+                if Issue.objects.filter(pk=request.data['issue']).exists():
+                    project = Issue.objects.get(pk=request.data['issue']).project
+                else:
+                    self.message = 'Création impossible'
+                    return False
+            elif 'project' in request.data:
+                project = Project.objects.get(pk=request.data['project'])
             return Contributor.objects.filter(project=project, user=request.user).exists()
         return True
 
     def has_object_permission(self, request, view, obj):
-        return Contributor.objects.filter(project=obj.project, user=request.user).exists()
+        project = obj.project
+        return Contributor.objects.filter(project=project, user=request.user).exists()
 
 
 class IsNotAllowedToList(BasePermission):
@@ -114,7 +122,6 @@ class IssueViewset(ModelViewSet):
 
     serializer_class = IssueSerializer
     detail_serializer_class = IssueDetailSerializer
-    permission_classes = [IsAuthenticated, IsNotAllowedToList]
 
     def get_queryset(self):
         return Issue.objects.all()
@@ -124,8 +131,15 @@ class IssueViewset(ModelViewSet):
             return self.detail_serializer_class
         return super().get_serializer_class()
 
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated, IsNotAllowedToList]
+        if self.action in ('create', 'retrieve'):
+            permission_classes += [IsContributor]
+        elif self.action in ('update', 'partial_update', 'destroy'):
+            permission_classes += [IsAuthor]
+        return [permission() for permission in permission_classes]
+
     def create(self, request):
-        self.permission_classes += [IsContributor]
         serializer = self.get_serializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -134,13 +148,11 @@ class IssueViewset(ModelViewSet):
             return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
-        self.permission_classes += [IsContributor]
         issue = self.get_object()
         serializer = self.get_serializer(issue)
         return Response(serializer.data)
 
     def update(self, request, pk=None):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         serializer = self.get_serializer(product, data=request.data)
         if serializer.is_valid():
@@ -150,7 +162,6 @@ class IssueViewset(ModelViewSet):
             return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         serializer = self.get_serializer(product, data=request.data, partial=True)
         if serializer.is_valid():
@@ -160,7 +171,6 @@ class IssueViewset(ModelViewSet):
             return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -170,7 +180,6 @@ class CommentViewset(ModelViewSet):
 
     serializer_class = CommentSerializer
     detail_serializer_class = CommentDetailSerializer
-    permission_classes = [IsAuthenticated, IsNotAllowedToList]
 
     def get_queryset(self):
         return Comment.objects.all()
@@ -180,17 +189,23 @@ class CommentViewset(ModelViewSet):
             return self.detail_serializer_class
         return super().get_serializer_class()
 
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated, IsNotAllowedToList]
+        if self.action == 'create':
+            permission_classes += [IsContributor]
+        elif self.action in ('update', 'partial_update', 'destroy'):
+            permission_classes += [IsAuthor]
+        return [permission() for permission in permission_classes]
+
     def create(self, request):
-        self.permission_classes += [IsContributor]
-        serializer = CommentSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
+        if Issue.objects.filter(pk=request.data['issue']).exists():
+            serializer = CommentSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         serializer = self.get_serializer(product, data=request.data)
         if serializer.is_valid():
@@ -200,7 +215,6 @@ class CommentViewset(ModelViewSet):
             return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         serializer = self.get_serializer(product, data=request.data, partial=True)
         if serializer.is_valid():
@@ -210,7 +224,6 @@ class CommentViewset(ModelViewSet):
             return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
-        self.permission_classes += [IsAuthor]
         product = self.get_object()
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

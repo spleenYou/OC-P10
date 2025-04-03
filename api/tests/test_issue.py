@@ -1,6 +1,5 @@
 import pytest
 import CONST as C
-import datetime
 import json
 
 
@@ -59,9 +58,6 @@ class TestIssue:
             }
         )
         return tokens.json()['access']
-
-    def format_datetime(self, value):
-        return (value + datetime.timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S.%f+02:00')
 
     def test_issue_add_by_author_not_logged(self):
         response = C.client.post(
@@ -182,7 +178,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous ne faites pas partie du projet"
+            'detail': "Vous devez être l'auteur du projet"
         }
         assert response.json() == expected_response
 
@@ -251,7 +247,7 @@ class TestIssue:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous ne faites pas partie du projet"
+            'detail': "Vous devez être l'auteur du projet"
         }
         assert response.json() == expected_response
 
