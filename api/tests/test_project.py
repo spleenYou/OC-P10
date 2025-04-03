@@ -147,7 +147,7 @@ class TestProject:
         )
         assert response_update.status_code == 403
         expected_response = {
-            'detail': "Vous devez être l'auteur du projet"
+            'detail': "Vous devez être l'auteur"
         }
         assert response_update.json() == expected_response
 
@@ -219,7 +219,7 @@ class TestProject:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous devez être l'auteur du projet"
+            'detail': "Vous devez être l'auteur"
         }
         assert response.json() == expected_response
 
@@ -250,7 +250,7 @@ class TestProject:
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous devez être l'auteur du projet"
+            'detail': "Vous devez être l'auteur"
         }
         assert response.json() == expected_response
 

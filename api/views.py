@@ -15,7 +15,7 @@ from rest_framework import status
 
 
 class IsAuthor(BasePermission):
-    message = "Vous devez être l'auteur du projet"
+    message = "Vous devez être l'auteur"
 
     def has_object_permission(self, request, view, obj):
         return request.user == obj.author

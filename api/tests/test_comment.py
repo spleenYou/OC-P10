@@ -233,3 +233,23 @@ class TestComment:
             'id': response.json()['id']
         }
         assert response.json() == expected_response
+
+    def test_comment_delete_by_another_user_fail(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.delete(
+            f"{C.api_url}comment/{comment.id}/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': "Vous devez être l'auteur"
+        }
+        assert response.json() == expected_response
+
+    def test_comment_delete(self):
+        comment = Comment.objects.all()[0]
+        response = C.client.delete(
+            f"{C.api_url}comment/{comment.id}/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 204
