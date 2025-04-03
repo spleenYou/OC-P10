@@ -98,6 +98,10 @@ class TestProject:
         )
         return tokens.json()['access']
 
+    def test_project_return_title(self):
+        project = Project.objects.get(pk=1)
+        assert self.projects[0].title == project.__str__()
+
     def test_project_add_fail(self):
         self.user1
         project_response = C.client.post(

@@ -77,6 +77,11 @@ class TestComment:
         )
         return tokens.json()['access']
 
+    def test_comment_return_str(self):
+        comment = Comment.objects.get(pk=1)
+        expected_return = f"Commentaire pour {self.issue.json()['title']} by {self.user2.json()['username']}"
+        assert comment.__str__() == expected_return
+
     def test_comment_list_fail(self):
         response = C.client.get(
             f'{C.api_url}comment/',

@@ -1,6 +1,7 @@
 import pytest
 import CONST as C
 import json
+from api.models import Issue
 
 
 @pytest.mark.django_db
@@ -58,6 +59,10 @@ class TestIssue:
             }
         )
         return tokens.json()['access']
+
+    def test_issue_return_title(self):
+        issue = Issue.objects.get(pk=1)
+        assert self.issue.json()['title'] == issue.__str__()
 
     def test_issue_add_by_author_not_logged(self):
         response = C.client.post(
