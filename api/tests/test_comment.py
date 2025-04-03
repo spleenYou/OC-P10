@@ -35,7 +35,7 @@ class TestComment:
                 'description': 'Description du projet 1',
                 'project_type': "front-end",
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         self.issue = C.client.post(
             f'{C.api_url}issue/',
@@ -47,7 +47,7 @@ class TestComment:
                 'priority': 'LOW',
                 'tag': 'BUG',
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         self.contributor = C.client.post(
             f'{C.api_url}contributor/',
@@ -55,7 +55,7 @@ class TestComment:
                 'user': self.user2.json()['id'],
                 'project': self.project.json()['id']
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         self.comment = C.client.post(
             f'{C.api_url}comment/',
@@ -63,7 +63,7 @@ class TestComment:
                 'issue': self.issue.json()['id'],
                 'description': 'Solution de ouf',
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
 
     def get_token_access(self, user_data):
@@ -79,7 +79,7 @@ class TestComment:
     def test_comment_list_fail(self):
         response = C.client.get(
             f'{C.api_url}comment/',
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'},
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -90,7 +90,7 @@ class TestComment:
     def test_comment_list_by_issue(self):
         response = C.client.get(
             f"{C.api_url}issue/{self.issue.json()['id']}/",
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'},
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 200
         expected_response = {

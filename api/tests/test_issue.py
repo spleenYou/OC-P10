@@ -35,7 +35,7 @@ class TestIssue:
                 'description': 'Description du projet 1',
                 'project_type': "front-end",
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         self.issue = C.client.post(
             f'{C.api_url}issue/',
@@ -47,7 +47,7 @@ class TestIssue:
                 'priority': 'LOW',
                 'tag': 'BUG',
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
 
     def get_token_access(self, user):
@@ -92,7 +92,7 @@ class TestIssue:
                 'priority': 'LOW',
                 'tag': 'BUG',
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_value = {
@@ -111,7 +111,7 @@ class TestIssue:
                 'priority': 'LOW',
                 'tag': 'BUG',
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 201
         expected_value = {
@@ -150,7 +150,7 @@ class TestIssue:
             data={
                 'project': self.project.json()['id'],
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 400
         expected_value = {
@@ -161,9 +161,7 @@ class TestIssue:
     def test_issue_list_not_allowed(self):
         response = C.client.get(
             f'{C.api_url}issue/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}',
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -179,10 +177,8 @@ class TestIssue:
                     'title': 'Meilleur titre',
                 },
             ),
-            headers={
-                'content-type': 'application/json',
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}',
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
         )
         assert response.status_code == 403
         expected_response = {
@@ -198,9 +194,7 @@ class TestIssue:
                     'title': 'Meilleur titre',
                 },
             ),
-            headers={
-                'content-type': 'application/json',
-            }
+            content_type='application/json',
         )
         assert response.status_code == 401
         expected_response = {
@@ -216,10 +210,8 @@ class TestIssue:
                     'title': 'Meilleur titre',
                 },
             ),
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}',
-                'content-type': 'application/json',
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
         )
         assert response.status_code == 200
         expected_response = {
@@ -255,9 +247,7 @@ class TestIssue:
     def test_issue_delete_by_another_user(self):
         response = C.client.delete(
             f'{C.api_url}issue/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}',
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -278,8 +268,6 @@ class TestIssue:
     def test_issue_delete(self):
         response = C.client.delete(
             f'{C.api_url}issue/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}',
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 204

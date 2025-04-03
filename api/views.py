@@ -51,14 +51,6 @@ class IsNotAllowedToList(BasePermission):
         return view.action != 'list'
 
 
-class NoUpdate(BasePermission):
-
-    message = 'Mise à jour impossible'
-
-    def has_permission(self, request, view):
-        return view.action not in ('update', 'partial_update')
-
-
 class ProjectViewset(ModelViewSet):
 
     serializer_class = ProjectSerializer
@@ -95,7 +87,7 @@ class ProjectViewset(ModelViewSet):
 class ContributorViewset(ModelViewSet):
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthenticated, NoUpdate]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Contributor.objects.all()
@@ -111,8 +103,13 @@ class ContributorViewset(ModelViewSet):
         else:
             return Response({'detail': 'Création impossible'}, status=status.HTTP_403_FORBIDDEN)
 
+    def update(self, request, pk=None):
+        return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_403_FORBIDDEN)
+
+    def partial_update(self, request, pk=None):
+        return Response({'detail': 'Mise à jour impossible'}, status=status.HTTP_403_FORBIDDEN)
+
     def destroy(self, request, pk=None):
-        print(f'{request.user} == {Contributor.objects.get(pk=pk).user}')
         if request.user == Contributor.objects.get(pk=pk).user:
             product = self.get_object()
             product.delete()

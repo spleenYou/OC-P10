@@ -119,7 +119,7 @@ class TestProject:
                 'description': 'test',
                 'project_type': 'Android'
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert project_response.status_code == 201
 
@@ -129,9 +129,7 @@ class TestProject:
         response_update = C.client.patch(
             f'{C.api_url}project/{project_id}/',
             data=json.dumps({'description': 'changement de description'}),
-            headers={
-                'content-type': 'application/json',
-            }
+            content_type='application/json',
         )
         assert response_update.status_code == 401
         expected_response = {
@@ -144,10 +142,8 @@ class TestProject:
         response_update = C.client.patch(
             f'{C.api_url}project/{project.id}/',
             data=json.dumps({'description': 'changement de description'}),
-            headers={
-                'content-type': 'application/json',
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
         )
         assert response_update.status_code == 403
         expected_response = {
@@ -161,10 +157,8 @@ class TestProject:
         response_update = C.client.patch(
             f'{C.api_url}project/{project_id}/',
             data=json.dumps({'description': 'changement de description'}),
-            headers={
-                'content-type': 'application/json',
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+            content_type='application/json',
         )
         assert response_update.status_code == 200
         expected_response = {
@@ -181,9 +175,7 @@ class TestProject:
         url = reverse_lazy('project-list')
         response = C.client.get(
             url,
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 200
         assert response.json()['results'] == self.get_project_list(self.projects)
@@ -192,9 +184,7 @@ class TestProject:
         url = reverse_lazy('project-list')
         response = C.client.get(
             url,
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 200
         assert response.json()['results'] == self.get_project_list(self.projects)
@@ -207,9 +197,7 @@ class TestProject:
     def test_project_detail(self):
         response = C.client.get(
             f'{C.api_url}project/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 200
         expected_response = {
@@ -227,9 +215,7 @@ class TestProject:
     def test_project_detail_by_user_not_in_project(self):
         response = C.client.get(
             f'{C.api_url}project/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -260,9 +246,7 @@ class TestProject:
     def test_project_delete_by_user_not_in_project(self):
         response = C.client.delete(
             f'{C.api_url}project/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -273,8 +257,6 @@ class TestProject:
     def test_project_delete(self):
         response = C.client.delete(
             f'{C.api_url}project/1/',
-            headers={
-                'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'
-            }
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 204

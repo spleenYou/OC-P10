@@ -1,6 +1,5 @@
 import pytest
 import CONST as C
-import json
 from api.models import Contributor
 
 
@@ -71,7 +70,7 @@ class TestContributor:
     def test_contributor_list(self):
         response = C.client.get(
             f'{C.api_url}contributor/',
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 200
         contributor = Contributor.objects.all()
@@ -135,7 +134,7 @@ class TestContributor:
                 'user': self.user2.json()['id'],
                 'project': self.project.json()['id']
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 201
         expected_response = {
@@ -181,7 +180,7 @@ class TestContributor:
                 'user': self.user2.json()['id'],
                 'project': 3
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user2_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 400
         expected_response = {
@@ -196,7 +195,7 @@ class TestContributor:
                 'user': 10,
                 'project': self.project.json()['id']
             },
-            headers={'Authorization': f'Bearer {self.get_token_access(C.user1_data)}'}
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
         )
         assert response.status_code == 403
         expected_response = {
@@ -208,9 +207,9 @@ class TestContributor:
         contributor = Contributor.objects.all()[0]
         response = C.client.patch(
             f"/api/contributor/{contributor.id}/",
-            data=json.dumps({'user': ''}),
+            data={'user': ''},
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
-            content_type='application/json',
+            content_type='application/octet-stream',
         )
         assert response.status_code == 403
         expected_response = {
