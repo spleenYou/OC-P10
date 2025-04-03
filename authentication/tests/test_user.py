@@ -70,7 +70,8 @@ class TestUser:
         return self.user1
 
     def test_user_return_str(self):
-        assert self.get_user1().json()['username'] == User.objects.get(pk=1).username
+        user = self.get_user1()
+        assert user.json()['username'] == User.objects.get(pk=1).__str__()
 
     def test_create_user_missing_fields_failed(self):
         data = self.user1_data.copy()

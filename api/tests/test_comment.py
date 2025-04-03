@@ -161,6 +161,20 @@ class TestComment:
         }
         assert response.json() == expected_response
 
+    def test_comment_add_fail(self):
+        response = C.client.post(
+            f'{C.api_url}comment/',
+            data={
+                'issue': self.issue.json()['id'],
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'detail': 'Création impossible'
+        }
+        assert response.json() == expected_response
+
     def test_comment_add_non_existent_issue_fail(self):
         response = C.client.post(
             f'{C.api_url}comment/',
@@ -191,7 +205,7 @@ class TestComment:
         }
         assert response.json() == expected_response
 
-    def test_comment_update(self):
+    def test_comment_partial_update(self):
         comment = Comment.objects.all()[0]
         response = C.client.patch(
             f"{C.api_url}comment/{comment.id}/",
@@ -215,7 +229,25 @@ class TestComment:
         }
         assert response.json() == expected_response
 
-    def test_comment_update_not_by_author(self):
+    def test_comment_partial_update_fail(self):  # A debug
+        comment = Comment.objects.all()[0]
+        response = C.client.patch(
+            f"{C.api_url}comment/{comment.id}/",
+            data=json.dumps(
+                {
+                    'description': None,
+                }
+            ),
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+            content_type='application/json',
+        )
+        assert response.status_code == 400
+        expected_response = {
+            'detail': 'Mise à jour impossible'
+        }
+        assert response.json() == expected_response
+
+    def test_comment_partial_update_not_by_author(self):
         comment = Comment.objects.all()[0]
         response = C.client.patch(
             f"{C.api_url}comment/{comment.id}/",
