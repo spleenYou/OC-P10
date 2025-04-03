@@ -21,14 +21,6 @@ class IsAuthor(BasePermission):
         return request.user == obj.author
 
 
-class IsRequestUser(BasePermission):
-    message = "Vous n'êtes pas concerné"
-
-    def has_permission(self, request, view):
-        # Verifier l'interet de != list
-        return str(request.user.id) == request.POST['user'] and view.action != 'list'
-
-
 class IsContributor(BasePermission):
 
     message = 'Vous ne faites pas partie du projet'
