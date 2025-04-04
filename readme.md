@@ -86,21 +86,23 @@ To test the API in local mode, the start url will be http://127.0.0.1:8000/
 
 Responses are paginted by 10.
 
+All action are executed directly and can't be undone
+
 ### Authenticated
 
 Endpoints for authenticated manage users and tokens
 
 #### User actions
 <details>
-    <summary>list</summary>
+    <summary>List</summary>
 
-- Endpoint : user/
-- HTTP Method : GET
-- Token needed : Yes
-- Access : Login users
+- Endpoint: user/
+- HTTP Method: GET
+- Token needed: Yes
+- Access: Login users
 
-Success response Exemple :
-- HTTPstatus : 200
+Success response Exemple:
+- HTTP status: 200
 ```
 {
     "count": 2,
@@ -128,12 +130,14 @@ Success response Exemple :
 ```
 </details>
 <details>
-    <summary>create</summary>
+    <summary>Create</summary>
 
-- Endpoint : user/
-- HTTP Method : POST
-- Token needed : No
-- Access : Everyone
+To success, the user must be at least 15 years old
+
+- Endpoint: user/
+- HTTP Method: POST
+- Token needed: No
+- Access: Everyone
 - Data needed (with exemple):
     - username (user1)
     - password1 (password-test)
@@ -142,8 +146,8 @@ Success response Exemple :
     - can_be_contacted (True)
     - can_data_be_shared (False)
 
-Success response Exemple :
-- HTTP status : 201
+Success response Exemple:
+- HTTP status: 201
 ```
 {
     "id": 1,
@@ -155,12 +159,12 @@ Success response Exemple :
 ```
 </details>
 <details>
-    <summary>update</summary>
+    <summary>Update</summary>
 
-- Endpoint : user/\<id>/
-- HTTP Method : PATCH
-- Token needed : Yes
-- Access : the connected user for himself
+- Endpoint: user/\<id>/
+- HTTP Method: PATCH
+- Token needed: Yes
+- Access: the connected user for himself
 - Data can be choosen (exemple with id=1):
     - username (user-test-1)
     - password
@@ -168,8 +172,8 @@ Success response Exemple :
     - can_be_contacted
     - can_data_be_shared
 
-Success response Exemple :
-- HTTP status : 200
+Success response Exemple:
+- HTTP status: 200
 ```
 {
     "id": 1,
@@ -181,16 +185,58 @@ Success response Exemple :
 ```
 </details>
 <details>
-    <summary>delete</summary>
+    <summary>Delete</summary>
 
-- Endpoint : user/\<id>/
-- HTTP Method : DELETE
-- Token needed : Yes
-- Access : the connected user for himself
+- Endpoint: user/\<id>/
+- HTTP Method: DELETE
+- Token needed: Yes
+- Access: the connected user for himself
 
-Success response Exemple :
-- HTTP status : 204
+Success response Exemple:
+- HTTP status: 204
 
+</details>
+
+#### Token actions
+
+The access token is valid for 5 minutes.
+The refresh token is valid for 5 days.
+
+<details>
+    <summary>Get token access</summary>
+
+- Endpoint: user/login/
+- HTTP Method: POST
+- Access: Everyone
+- Data needed:
+    - username
+    - password
+
+Success response Exemple:
+- HTTPstatus: 200
+```
+{
+    "refresh": \<token>,
+    "access": \<token>
+}
+```
+</details>
+<details>
+    <summary>Get access token by refresh token</summary>
+
+- Endpoint: user/login/refresh/
+- HTTP Method: POST
+- Access: Everyone
+- Data needed:
+    - refresh token
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "access": \<token>
+}
+```
 </details>
 
 ## Database
