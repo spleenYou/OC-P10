@@ -200,6 +200,7 @@ Success response Exemple:
 #### Token actions
 
 The access token is valid for 5 minutes.
+
 The refresh token is valid for 5 days.
 
 <details>
@@ -216,8 +217,8 @@ Success response Exemple:
 - HTTPstatus: 200
 ```
 {
-    "refresh": \<token>,
-    "access": \<token>
+    "refresh": <token>,
+    "access": <token>
 }
 ```
 </details>
@@ -234,7 +235,7 @@ Success response Exemple:
 - HTTP status: 200
 ```
 {
-    "access": \<token>
+    "access": <token>
 }
 ```
 </details>
