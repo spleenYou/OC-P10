@@ -100,7 +100,7 @@ Endpoints for authenticated manage users and tokens
 - Access : Login users
 
 Success response Exemple :
-
+- HTTPstatus : 200
 ```
 {
     "count": 2,
@@ -143,7 +143,7 @@ Success response Exemple :
     - can_data_be_shared (False)
 
 Success response Exemple :
-
+- HTTP status : 201
 ```
 {
     "id": 1,
@@ -157,29 +157,40 @@ Success response Exemple :
 <details>
     <summary>update</summary>
 
-- Endpoint : user/\<id>
-- HTTP Method : POST
+- Endpoint : user/\<id>/
+- HTTP Method : PATCH
 - Token needed : Yes
 - Access : the connected user for himself
-- Data needed (with exemple):
-    - username
-    - password1
-    - password2
+- Data can be choosen (exemple with id=1):
+    - username (user-test-1)
+    - password
     - birthday
     - can_be_contacted
     - can_data_be_shared
 
 Success response Exemple :
-
+- HTTP status : 200
 ```
 {
     "id": 1,
-    "username": "user1",
+    "username": "user-test-1",
     "birthday": "2000-01-01",
     "can_be_contacted": true,
     "can_data_be_shared": false
 }
 ```
+</details>
+<details>
+    <summary>delete</summary>
+
+- Endpoint : user/\<id>/
+- HTTP Method : DELETE
+- Token needed : Yes
+- Access : the connected user for himself
+
+Success response Exemple :
+- HTTP status : 204
+
 </details>
 
 ## Database
