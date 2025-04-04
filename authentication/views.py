@@ -16,8 +16,10 @@ class IsAuthenticatedForActionsExceptCreate(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # Check if the user is the update user
-        return obj == request.user
+        'Check if the user is the request user except for retrieve action'
+        if view.action != 'retrieve':
+            return obj == request.user
+        return True
 
 
 class UserViewset(ModelViewSet):

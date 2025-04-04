@@ -99,7 +99,7 @@ Endpoints for authenticated manage users and tokens
 - Endpoint: user/
 - HTTP Method: GET
 - Token needed: Yes
-- Access: Every login users
+- Access: Any connected user
 
 Success response Exemple:
 - HTTP status: 200
@@ -159,6 +159,27 @@ Success response Exemple:
 ```
 </details>
 <details>
+    <summary>Details</summary>
+
+- Endpoint: user/\<id>/
+- HTTP Method: GET
+- Token needed: Yes
+- Access: Any connected user
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "username": "user1",
+    "birthday": "2000-01-01",
+    "can_be_contacted": true,
+    "can_data_be_shared": true,
+    "projects_created": []
+}
+```
+</details>
+<details>
     <summary>Update</summary>
 
 - Endpoint: user/\<id>/
@@ -194,7 +215,6 @@ Success response Exemple:
 
 Success response Exemple:
 - HTTP status: 204
-
 </details>
 
 #### Token actions
@@ -249,7 +269,7 @@ Token needed for all actions
 
 - Endpoint: api/project/
 - HTTP Method: GET
-- Access: Every login users
+- Access: Any connected user
 
 Success response Exemple:
 - HTTP status: 200
@@ -290,7 +310,7 @@ Success response Exemple:
 
 - Endpoint: api/project/
 - HTTP Method: POST
-- Access: Every login user
+- Access: Any connected user
 - Data needed (with exemple):
     - title (project 1)
     - description (Project's description)
@@ -315,6 +335,36 @@ Success response Exemple:
         "id": 1,
         "username": "user1"
     }
+}
+```
+</details>
+<details>
+    <summary>Details</summary>
+
+- Endpoint: api/project/\<id>/
+- HTTP Method: GET
+- Access: Any project's contributor
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "title": "Project 1",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    },
+    "date_created": "2025-04-02T15:24:36.201890+02:00",
+    "description": "Project's description",
+    "project_type": "Android",
+    "issues": [],
+    "contributors": [
+        {
+            "id": 1,
+            "username": "user1"
+        }
+    ]
 }
 ```
 </details>

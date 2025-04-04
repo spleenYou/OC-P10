@@ -38,7 +38,10 @@ class IsContributor(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
-        project = obj.project
+        if isinstance(view, ProjectViewset):
+            project = obj
+        else:
+            project = obj.project
         return Contributor.objects.filter(project=project, user=request.user).exists()
 
 
@@ -54,7 +57,7 @@ class ProjectViewset(ModelViewSet):
 
     serializer_class = ProjectSerializer
     detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticated, IsAuthor]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Project.objects.all()
@@ -63,6 +66,14 @@ class ProjectViewset(ModelViewSet):
         if self.action == 'retrieve':
             return self.detail_serializer_class
         return super().get_serializer_class()
+
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated]
+        if self.action in ('retrieve'):
+            permission_classes += [IsContributor]
+        elif self.action in ('update', 'partial_update', 'destroy'):
+            permission_classes += [IsAuthor]
+        return [permission() for permission in permission_classes]
 
     def create(self, request):
         serializer = ProjectSerializer(data=request.data, context={'request': request})
