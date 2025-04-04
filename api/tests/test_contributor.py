@@ -117,6 +117,42 @@ class TestContributor:
         }
         assert response.json() == expected_response
 
+    def test_contributor_detail(self):
+        response = C.client.get(
+            f'{C.api_url}contributor/1/',
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'project': {
+                'id': self.project.json()['id'],
+                'author': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username']
+                },
+                'title': self.project.json()['title'],
+                'project_type': self.project.json()['project_type'],
+                'date_created': self.project.json()['date_created'],
+                'description': self.project.json()['description'],
+            },
+            'user': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username']
+            }
+        }
+        assert response.json() == expected_response
+
+    def test_contributor_detail_fail(self):
+        response = C.client.get(
+            f'{C.api_url}contributor/10/',
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 404
+        expected_response = {
+            'detail': 'No Contributor matches the given query.'
+        }
+        assert response.json() == expected_response
+
     def test_contributor_list_not_logged_fail(self):
         response = C.client.get(
             f'{C.api_url}contributor/',
