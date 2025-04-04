@@ -91,14 +91,15 @@ Responses are paginted by 10.
 Endpoints for authenticated manage users and tokens
 
 #### User actions
+<details>
+    <summary>list</summary>
 
-- list :
-    - Endpoint : user/
-    - HTTP Method : GET
-    - Token needed : Yes
-    - Access : Login users
+- Endpoint : user/
+- HTTP Method : GET
+- Token needed : Yes
+- Access : Login users
 
-Response Exemple :
+Success response Exemple :
 
 ```
 {
@@ -125,6 +126,61 @@ Response Exemple :
     ]
 }
 ```
+</details>
+<details>
+    <summary>create</summary>
+
+- Endpoint : user/
+- HTTP Method : POST
+- Token needed : No
+- Access : Everyone
+- Data needed (with exemple):
+    - username (user1)
+    - password1 (password-test)
+    - password2 (password-test)
+    - birthday (2000-01-01)
+    - can_be_contacted (True)
+    - can_data_be_shared (False)
+
+Success response Exemple :
+
+```
+{
+    "id": 1,
+    "username": "user1",
+    "birthday": "2000-01-01",
+    "can_be_contacted": true,
+    "can_data_be_shared": false
+}
+```
+</details>
+<details>
+    <summary>update</summary>
+
+- Endpoint : user/\<id>
+- HTTP Method : POST
+- Token needed : Yes
+- Access : the connected user for himself
+- Data needed (with exemple):
+    - username
+    - password1
+    - password2
+    - birthday
+    - can_be_contacted
+    - can_data_be_shared
+
+Success response Exemple :
+
+```
+{
+    "id": 1,
+    "username": "user1",
+    "birthday": "2000-01-01",
+    "can_be_contacted": true,
+    "can_data_be_shared": false
+}
+```
+</details>
 
 ## Database
 
