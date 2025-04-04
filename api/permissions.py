@@ -37,8 +37,10 @@ class IsContributor(BasePermission):
     def has_object_permission(self, request, view, obj):
         if 'project' in request.path:
             project = obj
-        else:
+        elif 'issue' in request.path:
             project = obj.project
+        elif 'comment' in request.path:
+            project = obj.issue.project
         return Contributor.objects.filter(project=project, user=request.user).exists()
 
 

@@ -140,6 +140,45 @@ class TestComment:
         }
         assert response.json() == expected_response
 
+    def test_comment_detail(self):
+        response = C.client.get(
+            f"{C.api_url}comment/{self.comment.json()['id']}/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'id': self.comment.json()['id'],
+            'author': {
+                'id': self.user2.json()['id'],
+                'username': self.user2.json()['username'],
+            },
+            'description': self.comment.json()['description'],
+            'date_created': self.comment.json()['date_created']
+        }
+        assert response.json() == expected_response
+
+    def test_comment_detail_user_not_contributor_fail(self):
+        response = C.client.get(
+            f"{C.api_url}comment/1/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user3_data)}',
+        )
+        assert response.status_code == 403
+        expected_response = {
+            'detail': 'Vous ne faites pas partie du projet'
+        }
+        assert response.json() == expected_response
+
+    def test_comment_detail_fail(self):
+        response = C.client.get(
+            f"{C.api_url}comment/10/",
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 404
+        expected_response = {
+            'detail': 'No Comment matches the given query.'
+        }
+        assert response.json() == expected_response
+
     def test_comment_add(self):
         response = C.client.post(
             f'{C.api_url}comment/',
