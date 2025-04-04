@@ -27,12 +27,20 @@ class IsContributor(BasePermission):
     def has_permission(self, request, view):
         if view.action == 'create':
             if 'issue' in request.data:
+                # Tests for project
                 if Issue.objects.filter(pk=request.data['issue']).exists():
                     project = Issue.objects.get(pk=request.data['issue']).project
                 else:
                     self.message = 'Création impossible'
                     return False
             elif 'project' in request.data:
+                # Tests for issue
+                if 'assigned_user' in request.data:
+                    if not Contributor.objects.filter(
+                        user=request.data['assigned_user'],
+                            project=request.data['project']).exists():
+                        self.message = 'Création impossible'
+                        return False
                 project = Project.objects.get(pk=request.data['project'])
             return Contributor.objects.filter(project=project, user=request.user).exists()
         return True
@@ -145,6 +153,7 @@ class IssueViewset(ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
+            print(serializer.errors)
             return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):

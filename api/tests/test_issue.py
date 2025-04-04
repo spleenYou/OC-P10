@@ -145,6 +145,26 @@ class TestIssue:
         }
         assert response.json() == expected_value
 
+    def test_issue_add_with_user_not_contributor_fail(self):
+        response = C.client.post(
+            f'{C.api_url}issue/',
+            data={
+                'project': self.project.json()['id'],
+                'title': 'test',
+                'description': 'test',
+                'status': 'To-Do',
+                'priority': 'LOW',
+                'tag': 'BUG',
+                'assigned_user': self.user2.json()['id'],
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 403
+        expected_value = {
+            "detail": "Création impossible"
+        }
+        assert response.json() == expected_value
+
     def test_issue_add_fail(self):
         response = C.client.post(
             f'{C.api_url}issue/',
@@ -196,7 +216,7 @@ class TestIssue:
         }
         assert response.json() == expected_value
 
-    def test_issue_detail_by_user_not_contributor(self):
+    def test_issue_detail_by_user_not_contributor_fail(self):
         response = C.client.get(
             f'{C.api_url}issue/1/',
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
