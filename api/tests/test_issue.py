@@ -159,6 +159,54 @@ class TestIssue:
         }
         assert response.json() == expected_value
 
+    def test_issue_detail(self):
+        response = C.client.get(
+            f'{C.api_url}issue/1/',
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
+        )
+        assert response.status_code == 200
+        expected_value = {
+            'id': self.issue.json()['id'],
+            'author': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username'],
+            },
+            'date_created': self.issue.json()['date_created'],
+            'title': self.issue.json()['title'],
+            'assigned_user': {
+                'id': self.user1.json()['id'],
+                'username': self.user1.json()['username'],
+            },
+            'description': self.issue.json()['description'],
+            'status': self.issue.json()['status'],
+            'tag': self.issue.json()['tag'],
+            'priority': self.issue.json()['priority'],
+            'project': {
+                'id': self.project.json()['id'],
+                'author': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username'],
+                },
+                'title': self.project.json()['title'],
+                'project_type': self.project.json()['project_type'],
+                'description': self.project.json()['description'],
+                'date_created': self.project.json()['date_created'],
+            },
+            'comments': [],
+        }
+        assert response.json() == expected_value
+
+    def test_issue_detail_by_user_not_contributor(self):
+        response = C.client.get(
+            f'{C.api_url}issue/1/',
+            HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
+        )
+        assert response.status_code == 403
+        expected_value = {
+            'detail': 'Vous ne faites pas partie du projet'
+        }
+        assert response.json() == expected_value
+
     def test_issue_list_not_allowed(self):
         response = C.client.get(
             f'{C.api_url}issue/',
