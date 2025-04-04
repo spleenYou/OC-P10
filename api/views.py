@@ -78,16 +78,7 @@ class ProjectViewset(ModelViewSet):
     def create(self, request):
         serializer = ProjectSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            project = serializer.save()
-            # Add author to contributor automatically
-            contributor = ContributorSerializer(
-                data={
-                    'user': request.user.id,
-                    'project': project.id
-                }
-            )
-            if contributor.is_valid():
-                contributor.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

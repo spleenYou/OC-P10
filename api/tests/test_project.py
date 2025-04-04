@@ -133,7 +133,6 @@ class TestProject:
         assert response.json() == expected_response
 
     def test_project_add(self):
-        self.user1
         project_response = C.client.post(
             f'{C.api_url}project/',
             data={
@@ -230,18 +229,23 @@ class TestProject:
             'project_type': response.json()['project_type'],
             'date_created': response.json()['date_created'],
             'issues': [],
-            'contributors': [],
+            'contributors': [
+                {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username'],
+                }
+            ],
         }
         assert response.json() == expected_response
 
-    def test_project_detail_by_user_not_in_project(self):
+    def test_project_detail_by_user_not_contributor(self):
         response = C.client.get(
             f'{C.api_url}project/1/',
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 403
         expected_response = {
-            'detail': "Vous devez être l'auteur"
+            'detail': "Vous ne faites pas partie du projet"
         }
         assert response.json() == expected_response
 

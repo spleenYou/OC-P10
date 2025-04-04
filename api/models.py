@@ -51,6 +51,13 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        is_new_project = self.pk is None
+        super().save(*args, **kwargs)
+        # Create contributor from author if project is new
+        if is_new_project:
+            Contributor.objects.get_or_create(user=self.author, project=self)
+
     class Meta:
         verbose_name_plural = 'Projets'
 
