@@ -99,7 +99,7 @@ Endpoints for authenticated manage users and tokens
 - Endpoint: user/
 - HTTP Method: GET
 - Token needed: Yes
-- Access: Login users
+- Access: Every login users
 
 Success response Exemple:
 - HTTP status: 200
@@ -240,6 +240,122 @@ Success response Exemple:
 ```
 </details>
 
+#### project actions
+
+Token needed for all actions
+
+<details>
+    <summary>List</summary>
+
+- Endpoint: api/project/
+- HTTP Method: GET
+- Access: Every login users
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "title": "Projet 1",
+            "description": "description projet 1",
+            "project_type": "front-end",
+            "date_created": "2025-03-26T11:35:09.392474+01:00",
+            "author": {
+                "id": 1,
+                "username": "user1"
+            }
+        },
+        {
+            "id": 2,
+            "title": "Projet 2",
+            "description": "Description projet 2",
+            "project_type": "iOS",
+            "date_created": "2025-03-26T17:30:08.390441+01:00",
+            "author": {
+                "id": 3,
+                "username": "user2"
+            }
+        }
+    ]
+}
+```
+</details>
+<details>
+    <summary>Create</summary>
+
+- Endpoint: api/project/
+- HTTP Method: POST
+- Access: Every login user
+- Data needed (with exemple):
+    - title (project 1)
+    - description (Project's description)
+    - project_type (Android)
+
+Project's type can be:
+    - Android
+    - iOS
+    - back-end
+    - front-end
+
+Success response Exemple:
+- HTTP status: 201
+```
+{
+    "id": 1,
+    "title": "Project 1",
+    "description": "Project's description",
+    "project_type": "Android",
+    "date_created": "2025-04-04T11:29:53.129046+02:00",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    }
+}
+```
+</details>
+<details>
+    <summary>Update</summary>
+
+- Endpoint: api/project/\<id>/
+- HTTP Method: PATCH
+- Access: Project's author
+- Data can be choosen (exemple with id=1)
+    - title
+    - description
+    - project_type (iOS)
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "title": "Project 1",
+    "description": "Project's description",
+    "project_type": "iOS",
+    "date_created": "2025-04-04T11:29:53.129046+02:00",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    }
+}
+```
+</details>
+<details>
+    <summary>Delete</summary>
+
+- Endpoint: api/project/\<id>/
+- HTTP Method: DELETE
+- Access: Project's author
+
+Success response Exemple:
+- HTTP status: 204
+
+</details>
 ## Database
 
 If you need a new and clean database, delete the database file "db.sqlite3"
