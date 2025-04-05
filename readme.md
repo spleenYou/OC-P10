@@ -692,6 +692,139 @@ Success response Exemple:
 - HTTP status: 204
 </details>
 
+#### Contributor actions
+
+Token needed for all actions
+
+<details>
+    <summary>List</summary>
+
+- Endpoint: contributor/
+- HTTP Method: GET
+- Access: Any connected user
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "user": {
+                "id": 1,
+                "username": "user1"
+            },
+            "project": {
+                "id": 1,
+                "title": "Projet 1",
+                "description": "description projet 1",
+                "project_type": "front-end",
+                "date_created": "2025-03-26T11:35:09.392474+01:00",
+                "author": {
+                    "id": 1,
+                    "username": "user1"
+                }
+            }
+        },
+        {
+            "user": {
+                "id": 2,
+                "username": "user2"
+            },
+            "project": {
+                "id": 1,
+                "title": "Projet 1",
+                "description": "description projet 1",
+                "project_type": "front-end",
+                "date_created": "2025-03-26T11:35:09.392474+01:00",
+                "author": {
+                    "id": 1,
+                    "username": "user1"
+                }
+            }
+        }
+    ]
+}
+```
+</details>
+<details>
+    <summary>Create</summary>
+
+- Endpoint: api/contributor/
+- HTTP Method: POST
+- Access: Any connected user
+- Data needed (with exemple):
+    - user (user's id)
+    - project (project's id)
+
+Success response Exemple:
+- HTTP status: 201
+```
+{
+    "user": {
+        "id": 2,
+        "username": "user2"
+    },
+    "project": {
+        "id": 1,
+        "title": "Projet 1",
+        "description": "Description projet 1",
+        "project_type": "Android",
+        "date_created": "2025-03-26T17:30:08.390441+01:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    }
+}
+```
+</details>
+<details>
+    <summary>Details</summary>
+
+- Endpoint: api/contributor/\<id>/
+- HTTP Method: GET
+- Access: Any connected user
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "user": {
+        "id": 1,
+        "username": "user1"
+    },
+    "project": {
+        "id": 1,
+        "title": "Projet 1",
+        "description": "description projet 1",
+        "project_type": "front-end",
+        "date_created": "2025-03-26T11:35:09.392474+01:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    }
+}
+```
+</details>
+<details>
+    <summary>Update</summary>
+Update is not allowed
+</details>
+<details>
+    <summary>Delete</summary>
+
+- Endpoint: api/contributor/\<id>/
+- HTTP Method: DELETE
+- Access: Contributor's user
+
+Success response Exemple:
+- HTTP status: 204
+</details>
+
 ## Database
 
 If you need a new and clean database, delete the database file "db.sqlite3"
