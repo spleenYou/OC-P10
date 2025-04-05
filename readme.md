@@ -111,9 +111,7 @@ Success response Exemple:
     "results": [
         {
             "id": 1,
-            "username": "user1",
-            "birthday": "1985-01-01",
-            "can_be_contacted": true,
+            "username": "user1"2000-01-01 true,
             "can_data_be_shared": true,
             "projects_created": []
         },
@@ -139,9 +137,9 @@ To success, the user must be at least 15 years old
 - Token needed: No
 - Access: Everyone
 - Data needed (with exemple):
-    - username (user1)
-    - password1 (password-test)
-    - password2 (password-test)
+    - username ('user1')
+    - password1 ('password-test')
+    - password2 ('password-test')
     - birthday (2000-01-01)
     - can_be_contacted (True)
     - can_data_be_shared (False)
@@ -187,7 +185,7 @@ Success response Exemple:
 - Token needed: Yes
 - Access: the connected user for himself
 - Data can be choosen (exemple with id=1):
-    - username (user-test-1)
+    - username ('user-test-1')
     - password
     - birthday
     - can_be_contacted
@@ -260,7 +258,7 @@ Success response Exemple:
 ```
 </details>
 
-#### project actions
+#### Project actions
 
 Token needed for all actions
 
@@ -312,9 +310,9 @@ Success response Exemple:
 - HTTP Method: POST
 - Access: Any connected user
 - Data needed (with exemple):
-    - title (project 1)
-    - description (Project's description)
-    - project_type (Android)
+    - title ('project 1')
+    - description ('Project's description')
+    - project_type ('Android')
 
 Project's type can be:
     - Android
@@ -377,7 +375,7 @@ Success response Exemple:
 - Data can be choosen (exemple with id=1)
     - title
     - description
-    - project_type (iOS)
+    - project_type ('iOS')
 
 Success response Exemple:
 - HTTP status: 200
@@ -406,6 +404,181 @@ Success response Exemple:
 - HTTP status: 204
 
 </details>
+
+#### Issue actions
+
+Token needed for all actions
+
+<details>
+    <summary>List</summary>
+
+Listing issues isn't allowed directly.
+Use detail project for that.
+
+</details>
+<details>
+    <summary>Create</summary>
+
+- Endpoint: api/issue/
+- HTTP Method: POST
+- Access: Any project's contributors
+- Data needed (with exemple):
+    - project (project's id)
+    - title ('test')
+    - description ('Project's description')
+    - status ('To-Do')
+    - priority ('LOW')
+    - tag ('BUG')
+
+Project's status can be:
+    - To-Do
+    - In Progress
+    - Finished
+
+Project's priority can be:
+    - LOW
+    - MEDIUM
+    - HIGH
+
+Project's tag can be:
+    - BUG
+    - TASK
+    - FEATURE
+
+Success response Exemple:
+- HTTP status: 201
+```
+{
+    "id": 1,
+    "project": {
+        "id": 1,
+        "title": "Projet 1",
+        "description": "Description du projet 1",
+        "project_type": "Android",
+        "date_created": "2025-04-02T15:24:36.201890+02:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    },
+    "title": "test",
+    "description": "test",
+    "status": "To-Do",
+    "priority": "LOW",
+    "tag": "BUG",
+    "assigned_user": {
+        "id": 1,
+        "username": "user1"
+    },
+    "date_created": "2025-04-05T11:53:38.859386+02:00",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    }
+}
+```
+</details>
+<details>
+    <summary>Details</summary>
+
+- Endpoint: api/issue/\<id>/
+- HTTP Method: GET
+- Access: Any project's contributor
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "author": {
+        "id": 1,
+        "username": "user1"
+    },
+    "project": {
+        "id": 1,
+        "title": "Projet 1",
+        "description": "Description du projet 1",
+        "project_type": "Android",
+        "date_created": "2025-04-02T15:24:36.201890+02:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    },
+    "title": "test",
+    "description": "test",
+    "status": "To-Do",
+    "priority": "LOW",
+    "tag": "BUG",
+    "assigned_user": {
+        "id": 1,
+        "username": "user1"
+    },
+    "date_created": "2025-04-05T11:53:38.859386+02:00",
+    "comments": []
+}
+```
+</details>
+<details>
+    <summary>Update</summary>
+
+- Endpoint: api/issue/\<id>/
+- HTTP Method: PATCH
+- Access: Issue's author
+- Data can be choosen (exemple with id=1)
+    - project
+    - title
+    - description
+    - status
+    - priority ('HIGH')
+    - tag
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1
+    "author": {
+        "id": 1,
+        "username": "user1"
+    },
+    "project": {
+        "id": 1,
+        "title": "Projet 1",
+        "description": "Description du projet 1",
+        "project_type": "Android",
+        "date_created": "2025-04-02T15:24:36.201890+02:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    },
+    "title": "test",
+    "description": "test",
+    "status": "To-Do",
+    "priority": "HIGH",
+    "tag": "BUG",
+    "assigned_user": {
+        "id": 1,
+        "username": "user1"
+    },
+    "date_created": "2025-04-05T11:53:38.859386+02:00",
+    "comments": []
+}
+```
+</details>
+<details>
+    <summary>Delete</summary>
+
+- Endpoint: api/issue/\<id>/
+- HTTP Method: DELETE
+- Access: Issue's author
+
+Success response Exemple:
+- HTTP status: 204
+
+</details>
+
 ## Database
 
 If you need a new and clean database, delete the database file "db.sqlite3"
