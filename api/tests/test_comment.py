@@ -153,7 +153,35 @@ class TestComment:
                 'username': self.user2.json()['username'],
             },
             'description': self.comment.json()['description'],
-            'date_created': self.comment.json()['date_created']
+            'date_created': self.comment.json()['date_created'],
+            'issue': {
+                'id': self.issue.json()['id'],
+                'project': {
+                    'id': self.project.json()['id'],
+                    'title': self.project.json()['title'],
+                    'description': self.project.json()['description'],
+                    'project_type': self.project.json()['project_type'],
+                    'date_created': self.project.json()['date_created'],
+                    'author': {
+                        'id': self.user1.json()['id'],
+                        'username': self.user1.json()['username'],
+                    },
+                },
+                'title': self.issue.json()['title'],
+                'description': self.issue.json()['description'],
+                'status': self.issue.json()['status'],
+                'priority': self.issue.json()['priority'],
+                'tag': self.issue.json()['tag'],
+                'date_created': self.issue.json()['date_created'],
+                'assigned_user': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username'],
+                },
+                'author': {
+                    'id': self.user1.json()['id'],
+                    'username': self.user1.json()['username'],
+                },
+            }
         }
         assert response.json() == expected_response
 

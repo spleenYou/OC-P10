@@ -402,7 +402,6 @@ Success response Exemple:
 
 Success response Exemple:
 - HTTP status: 204
-
 </details>
 
 #### Issue actions
@@ -411,10 +410,8 @@ Token needed for all actions
 
 <details>
     <summary>List</summary>
-
 Listing issues isn't allowed directly.
 Use detail project for that.
-
 </details>
 <details>
     <summary>Create</summary>
@@ -576,7 +573,123 @@ Success response Exemple:
 
 Success response Exemple:
 - HTTP status: 204
+</details>
 
+#### Comment actions
+
+Token needed for all actions
+
+<details>
+    <summary>List</summary>
+Listing comments isn't allowed directly.
+Use detail project for that.
+</details>
+<details>
+    <summary>Create</summary>
+
+- Endpoint: api/comment/
+- HTTP Method: POST
+- Access: Any project's contributors
+- Data needed (with exemple):
+    - issue (issue's id)
+    - description ('test')
+
+Success response Exemple:
+- HTTP status: 201
+```
+{
+    "id": 1,
+    "description": "test",
+    "date_created": "2025-04-05T12:03:51.148416+02:00",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    }
+}
+```
+</details>
+<details>
+    <summary>Details</summary>
+
+- Endpoint: api/comment/\<id>/
+- HTTP Method: GET
+- Access: Any project's contributor
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "author": {
+        "id": 1,
+        "username": "user1"
+    },
+    "description": "test",
+    "date_created": "2025-04-05T12:03:51.148416+02:00",
+    "issue": {
+        "id": 1,
+        "project": {
+            "id": 1,
+            "title": "Projet 1",
+            "description": "Description du projet 1",
+            "project_type": "Android",
+            "date_created": "2025-04-02T15:24:36.201890+02:00",
+            "author": {
+                "id": 1,
+                "username": "user1"
+            }
+        },
+        "title": "test",
+        "description": "test",
+        "status": "To-Do",
+        "priority": "LOW",
+        "tag": "BUG",
+        "assigned_user": {
+            "id": 1,
+            "username": "user1"
+        },
+        "date_created": "2025-04-05T11:53:38.859386+02:00",
+        "author": {
+            "id": 1,
+            "username": "user1"
+        }
+    }
+}
+```
+</details>
+<details>
+    <summary>Update</summary>
+
+- Endpoint: api/comment/\<id>/
+- HTTP Method: PATCH
+- Access: Issue's author
+- Data can be choosen (exemple with id=1)
+    - issue
+    - description ('nouvelle description')
+
+Success response Exemple:
+- HTTP status: 200
+```
+{
+    "id": 1,
+    "description": "nouvelle description",
+    "date_created": "2025-03-28T10:57:59.385515+01:00",
+    "author": {
+        "id": 1,
+        "username": "user1"
+    }
+}
+```
+</details>
+<details>
+    <summary>Delete</summary>
+
+- Endpoint: api/comment/\<id>/
+- HTTP Method: DELETE
+- Access: Issue's author
+
+Success response Exemple:
+- HTTP status: 204
 </details>
 
 ## Database
