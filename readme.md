@@ -24,6 +24,13 @@ SoftDesk support is an API RESTful which manage issues by projects
 - pytest-cov v6.1.0
 - pytest-django v4.10.0
 
+### Download application
+
+Clone this repository
+```
+git clone https://github.com/spleenYou/OC-P10.git
+```
+
 ### Environment
 
 #### Creation
@@ -51,13 +58,6 @@ For Unix/macOs
 
 ```
 source .<nom_de_l_environnement_virtuel>/bin/activate
-```
-
-### Download application
-
-Clone this repository
-```
-git clone https://github.com/spleenYou/OC-P10.git
 ```
 
 ### Start server
