@@ -37,11 +37,8 @@ git clone https://github.com/spleenYou/OC-P10.git
 
 Create the environment with poetry.
 
-Replace :
-- \<version> by your version number of python
-- <nom_de_l_environnement_virtuel> by the name you want
-
 ```
+cd OC-P10/
 poetry install --no-root
 ```
 
@@ -49,15 +46,18 @@ poetry install --no-root
 
 Activate the virtual environment.
 
+Replace :
+- <env_name> by the name you want
+
 For windows
 ```
-.<nom_de_l_environnement_virtuel>/Scripts/activate
+.<env_name>/Scripts/activate
 ```
 
 For Unix/macOs
 
 ```
-source .<nom_de_l_environnement_virtuel>/bin/activate
+source .<env_name>/bin/activate
 ```
 
 ### Start server
