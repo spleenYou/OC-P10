@@ -4,7 +4,7 @@
 
 ## Presentation
 
-SoftDesk support is an API RESTful which manage issues by projects
+The SoftDesk project aims to develop a RESTful API for a project management and issue tracking system. This application is designed to enable users to collaborate effectively on projects, manage tasks and issues, while respecting security standards and optimization principles.
 
 ## Getting started
 
