@@ -32,10 +32,10 @@ Create the environment with poetry.
 
 Replace :
 - \<version> by your version number of python
-- <nom_de_l_environnement_virtuel> by the name you like
+- <nom_de_l_environnement_virtuel> by the name you want
 
 ```
-poetry --no-root
+poetry install --no-root
 ```
 
 #### Activation
