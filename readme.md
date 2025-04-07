@@ -9,6 +9,7 @@ SoftDesk support is an API RESTful which manage issues by projects
 ## Getting started
 
 - Python version used 3.10.12
+- Poetry version used 2.1.2
 
 ### Packages used for application
 
@@ -23,18 +24,18 @@ SoftDesk support is an API RESTful which manage issues by projects
 - pytest-cov v6.1.0
 - pytest-django v4.10.0
 
-### Virtual environment
+### Environment
 
 #### Creation
 
-Create the virtual environment.
+Create the environment with poetry.
 
 Replace :
 - \<version> by your version number of python
 - <nom_de_l_environnement_virtuel> by the name you like
 
 ```
-python<version> -m venv <nom_de_l_environnement_virtuel>
+poetry --no-root
 ```
 
 #### Activation
@@ -43,7 +44,7 @@ Activate the virtual environment.
 
 For windows
 ```
-<nom_de_l_environnement_virtuel>/Scripts/activate
+.<nom_de_l_environnement_virtuel>/Scripts/activate
 ```
 
 For Unix/macOs
@@ -54,28 +55,14 @@ source .<nom_de_l_environnement_virtuel>/bin/activate
 
 ### Download application
 
-
 Clone this repository
 ```
 git clone https://github.com/spleenYou/OC-P10.git
 ```
 
-### Install packages
-
-Be sure to be in your vitual environment.  
-Install needed packages.
-```
-pip install -r OC-P10/requirements.txt
-```
-
 ### Start server
 
-Change directory to be in Django project where you can find the file "manage.py"
-```
-cd OC-P10/
-```
-
-And start running Django server
+Starting Django server
 ```
 python manage.py runserver
 ```
