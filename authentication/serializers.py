@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from authentication.models import User
 from django.contrib.auth.password_validation import validate_password
+from django.conf import settings
 import datetime
 from api.serializers import ProjectSerializerForUserDetail
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
@@ -70,6 +71,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         data['access_token'] = data.pop('access')
         data['refresh_token'] = data.pop('refresh')
+        data['expires_in'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
         return data
 
 
@@ -82,4 +84,5 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         data['access_token'] = data.pop('access')
+        data['expires_in'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
         return data
