@@ -2,9 +2,12 @@ from rest_framework.viewsets import ModelViewSet
 from authentication.serializers import (
     UserCreateSerializer,
     UserSerializer,
+    CustomTokenObtainPairSerializer,
+    CustomTokenRefreshSerializer
 )
 from authentication.models import User
 from rest_framework.permissions import BasePermission
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 class IsAuthenticatedForActionsExceptCreate(BasePermission):
@@ -34,3 +37,11 @@ class UserViewset(ModelViewSet):
             return UserCreateSerializer
         else:
             return UserSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer

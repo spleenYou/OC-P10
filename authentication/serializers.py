@@ -3,6 +3,7 @@ from authentication.models import User
 from django.contrib.auth.password_validation import validate_password
 import datetime
 from api.serializers import ProjectSerializerForUserDetail
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -62,3 +63,23 @@ class UserSerializer(serializers.ModelSerializer):
         queryset = instance.projects_created.all()
         serializer = ProjectSerializerForUserDetail(queryset, many=True)
         return serializer.data
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['access_token'] = data.pop('access')
+        data['refresh_token'] = data.pop('refresh')
+        return data
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+
+    def validate_empty_values(self, value):
+        refresh_token = {'refresh': value['refresh_token']}
+        return (False, refresh_token)
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['access_token'] = data.pop('access')
+        return data
