@@ -58,7 +58,7 @@ class TestIssue:
                 'password': user['password1'],
             }
         )
-        return tokens.json()['access']
+        return tokens.json()['access_token']
 
     def test_issue_return_title(self):
         issue = Issue.objects.get(pk=1)

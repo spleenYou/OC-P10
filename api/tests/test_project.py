@@ -96,7 +96,7 @@ class TestProject:
                 'password': user_data['password1'],
             }
         )
-        return tokens.json()['access']
+        return tokens.json()['access_token']
 
     def test_project_return_title(self):
         project = Project.objects.get(pk=1)

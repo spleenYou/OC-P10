@@ -61,7 +61,7 @@ class TestUser:
                 'password': user_data['password1'],
             },
         )
-        return tokens.json()['access']
+        return tokens.json()['access_token']
 
     def get_user1(self):
         'Return the response of creating user1'

@@ -65,7 +65,7 @@ class TestContributor:
                 'password': user['password1'],
             }
         )
-        return tokens.json()['access']
+        return tokens.json()['access_token']
 
     def test_contributor_list(self):
         response = C.client.get(

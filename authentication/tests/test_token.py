@@ -42,21 +42,20 @@ class TestToken:
             'password': self.user_data['password1'],
         })
         assert response.status_code == 200
-        assert 'refresh' in response.json()
-        assert 'access' in response.json()
+        assert 'refresh_token' in response.json()
+        assert 'access_token' in response.json()
 
         # Obtain a new tokain from refresh token
-        token_refresh = response.json()['refresh']
+        token_refresh = response.json()['refresh_token']
         response = C.client.post(
             f'{C.user_url}login/refresh/',
             {
-                'refresh': token_refresh,
+                'refresh_token': token_refresh,
             },
         )
         assert response.status_code == 200
-        assert 'access' in response.json()
+        assert 'access_token' in response.json()
 
-    @pytest.mark.django_db
     def test_token_obtain_not_success(self):
         'Check the failure with a wrong password'
 

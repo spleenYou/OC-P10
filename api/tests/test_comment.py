@@ -75,7 +75,7 @@ class TestComment:
                 'password': user_data['password1'],
             }
         )
-        return tokens.json()['access']
+        return tokens.json()['access_token']
 
     def test_comment_return_str(self):
         comment = Comment.objects.get(pk=1)
