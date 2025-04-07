@@ -235,8 +235,8 @@ Success response Exemple:
 - HTTPstatus: 200
 ```
 {
-    "refresh": <token>,
-    "access": <token>
+    "refresh_token": <token>,
+    "access_token": <token>
 }
 ```
 </details>
@@ -247,13 +247,13 @@ Success response Exemple:
 - HTTP Method: POST
 - Access: Everyone
 - Data needed:
-    - refresh token
+    - refresh_token
 
 Success response Exemple:
 - HTTP status: 200
 ```
 {
-    "access": <token>
+    "access_token": <token>
 }
 ```
 </details>
