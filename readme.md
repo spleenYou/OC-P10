@@ -743,7 +743,6 @@ Success response Exemple:
 - HTTP Method: POST
 - Access: Any connected user
 - Data needed (with exemple):
-    - user (user's id)
     - project (project's id)
 
 Success response Exemple:
