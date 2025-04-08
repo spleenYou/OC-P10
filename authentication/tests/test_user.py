@@ -41,6 +41,7 @@ class TestUser:
         }
         self.user2_data = self.user1_data.copy()
         self.user2_data['username'] = 'client2-test'
+        self.user2_data['can_data_be_shared'] = False
 
     def birthday_formated(self, birthday=C.birthday):
         return birthday.strftime('%Y-%m-%d')
@@ -141,6 +142,25 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
+            'projects_created': []
+        }
+        assert response.json() == expected_response
+
+    def test_user_details_without_data(self):
+        self.get_user1()
+        user2 = C.client.post(C.user_url, self.user2_data)
+        response = C.client.get(
+            C.user_url + str(user2.json()['id']) + "/",
+            headers={
+                'Authorization': f'Bearer {self.token_obtain(self.user1_data)}'
+            }
+        )
+        assert response.status_code == 200
+        expected_response = {
+            'id': user2.json()['id'],
+            'username': self.user2_data['username'],
+            'can_be_contacted': self.user2_data['can_be_contacted'],
+            'can_data_be_shared': self.user2_data['can_data_be_shared'],
             'projects_created': []
         }
         assert response.json() == expected_response

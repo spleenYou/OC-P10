@@ -167,7 +167,6 @@ class TestContributor:
         response = C.client.post(
             f'{C.api_url}contributor/',
             data={
-                'user': self.user2.json()['id'],
                 'project': self.project.json()['id']
             },
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
@@ -199,7 +198,6 @@ class TestContributor:
         response = C.client.post(
             f'{C.api_url}contributor/',
             data={
-                'user': self.user2.json()['id'],
                 'project': self.project.json()['id']
             },
         )
@@ -213,7 +211,6 @@ class TestContributor:
         response = C.client.post(
             f'{C.api_url}contributor/',
             data={
-                'user': self.user2.json()['id'],
                 'project': 3
             },
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
@@ -224,11 +221,10 @@ class TestContributor:
         }
         assert response.json() == expected_response
 
-    def test_contributor_add_non_existent_user_fail(self):
+    def test_contributor_add_user_already_contributor(self):
         response = C.client.post(
             f'{C.api_url}contributor/',
             data={
-                'user': 10,
                 'project': self.project.json()['id']
             },
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user1_data)}',
