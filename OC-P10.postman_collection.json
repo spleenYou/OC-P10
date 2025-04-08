@@ -118,6 +118,9 @@
 				{
 					"name": "Create user",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -1013,6 +1016,11 @@
 		"type": "oauth2",
 		"oauth2": [
 			{
+				"key": "scope",
+				"value": "",
+				"type": "string"
+			},
+			{
 				"key": "refreshTokenUrl",
 				"value": "http://127.0.0.1:8000/user/login/refresh/",
 				"type": "string"
@@ -1025,11 +1033,6 @@
 			{
 				"key": "clientSecret",
 				"value": "",
-				"type": "string"
-			},
-			{
-				"key": "scope",
-				"value": "access, refresh",
 				"type": "string"
 			},
 			{
