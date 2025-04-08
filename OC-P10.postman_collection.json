@@ -88,7 +88,7 @@
 							"formdata": [
 								{
 									"key": "refresh_token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0NDU1NzcyOCwiaWF0IjoxNzQ0MTI1NzI4LCJqdGkiOiJkYWY3YjFiNjUyYWU0OGJlYjJlNjc0OWNlNDRkZWZmYiIsInVzZXJfaWQiOjJ9.Vt7gyEzhQrxDTiSL6v402VIeE3rEvl04tpxW1X7EcO0",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0NDU1ODUzOSwiaWF0IjoxNzQ0MTI2NTM5LCJqdGkiOiIxOTM1NWRmNDViOWI0YzcyODg4NTIwYTMxY2Q1N2FhOCIsInVzZXJfaWQiOjF9.d14_Z5YBXWwAdkg0tJN36rCwgBSk__mWVjVQJ-TKPWc",
 									"type": "text"
 								}
 							]
@@ -131,7 +131,7 @@
 							"formdata": [
 								{
 									"key": "username",
-									"value": "user1",
+									"value": "user5",
 									"type": "text"
 								},
 								{
@@ -156,7 +156,7 @@
 								},
 								{
 									"key": "can_data_be_shared",
-									"value": "False",
+									"value": "True",
 									"type": "text"
 								}
 							]
@@ -208,40 +208,6 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/user/1/",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "8000",
-							"path": [
-								"user",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "username",
-									"value": "user1",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
 							"raw": "http://127.0.0.1:8000/user/2/",
 							"protocol": "http",
 							"host": [
@@ -261,12 +227,22 @@
 					"response": []
 				},
 				{
-					"name": "delete user",
+					"name": "Update user",
 					"request": {
-						"method": "DELETE",
+						"method": "PATCH",
 						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "can_data_be_shared",
+									"value": "True",
+									"type": "text"
+								}
+							]
+						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/user/12/",
+							"raw": "http://127.0.0.1:8000/user/3/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -277,7 +253,31 @@
 							"port": "8000",
 							"path": [
 								"user",
-								"12",
+								"3",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/user/1/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"user",
+								"1",
 								""
 							]
 						}
@@ -299,7 +299,7 @@
 							"formdata": [
 								{
 									"key": "title",
-									"value": "Projet test",
+									"value": "Projet test 4",
 									"type": "text"
 								},
 								{
@@ -384,14 +384,14 @@
 									"disabled": true
 								},
 								{
-									"key": "description",
-									"value": "Description du projet 3",
+									"key": "project_type",
+									"value": "back-end",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/project/6/",
+							"raw": "http://127.0.0.1:8000/api/project/4/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -403,7 +403,7 @@
 							"path": [
 								"api",
 								"project",
-								"6",
+								"4",
 								""
 							]
 						}
@@ -416,7 +416,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/project/14/",
+							"raw": "http://127.0.0.1:8000/api/project/1/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -428,7 +428,7 @@
 							"path": [
 								"api",
 								"project",
-								"14",
+								"1",
 								""
 							]
 						}
@@ -474,13 +474,8 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "user",
-									"value": "2",
-									"type": "text"
-								},
-								{
 									"key": "project",
-									"value": "5",
+									"value": "1",
 									"type": "text"
 								}
 							]
@@ -1019,6 +1014,16 @@
 		"type": "oauth2",
 		"oauth2": [
 			{
+				"key": "username",
+				"value": "user4",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "SoftDesk_user4",
+				"type": "string"
+			},
+			{
 				"key": "scope",
 				"value": "",
 				"type": "string"
@@ -1054,11 +1059,6 @@
 				"type": "string"
 			},
 			{
-				"key": "username",
-				"value": "user1",
-				"type": "string"
-			},
-			{
 				"key": "grant_type",
 				"value": "password_credentials",
 				"type": "string"
@@ -1071,11 +1071,6 @@
 			{
 				"key": "authUrl",
 				"value": "",
-				"type": "string"
-			},
-			{
-				"key": "tokenName",
-				"value": "SoftDesk",
 				"type": "string"
 			},
 			{
