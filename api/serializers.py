@@ -82,7 +82,6 @@ class ContributorSerializer(ModelSerializer):
     class Meta:
         model = Contributor
         fields = [
-            'user',
             'project',
         ]
 
@@ -91,6 +90,10 @@ class ContributorSerializer(ModelSerializer):
         ret['user'] = UserSerializer(instance.user).data
         ret['project'] = ProjectSerializer(instance.project).data
         return ret
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class IssueWithoutProjectSerializer(ModelSerializer):

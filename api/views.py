@@ -55,12 +55,14 @@ class ContributorViewset(ModelViewSet):
         return Contributor.objects.all()
 
     def create(self, request):
-        if str(request.user.id) == request.data['user']:
-            serializer = self.serializer_class(data=request.data)
+        'Check if request user is not already contributor'
+        if not Contributor.objects.filter(project=request.data['project'], user=request.user.id).exists():
+            serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
+                print(serializer.errors)
                 return Response({'detail': 'Création impossible'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'detail': 'Création impossible'}, status=status.HTTP_403_FORBIDDEN)
