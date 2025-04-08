@@ -24,6 +24,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -85,7 +88,7 @@
 							"formdata": [
 								{
 									"key": "refresh_token",
-									"value": "{{refresh_token}}",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0NDU1NzcyOCwiaWF0IjoxNzQ0MTI1NzI4LCJqdGkiOiJkYWY3YjFiNjUyYWU0OGJlYjJlNjc0OWNlNDRkZWZmYiIsInVzZXJfaWQiOjJ9.Vt7gyEzhQrxDTiSL6v402VIeE3rEvl04tpxW1X7EcO0",
 									"type": "text"
 								}
 							]
@@ -143,7 +146,7 @@
 								},
 								{
 									"key": "birthday",
-									"value": "2015-01-01",
+									"value": "2000-01-01",
 									"type": "text"
 								},
 								{
