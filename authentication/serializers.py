@@ -65,6 +65,12 @@ class UserSerializer(serializers.ModelSerializer):
         serializer = ProjectSerializerForUserDetail(queryset, many=True)
         return serializer.data
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if not (ret['can_data_be_shared'] or (self.context['request'].user == instance)):
+            del ret['birthday']
+        return ret
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
