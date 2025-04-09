@@ -60,6 +60,15 @@ For Unix/macOs
 source .<env_name>/bin/activate
 ```
 
+### Database
+
+You need to build a database, Follow the command:
+
+```
+python manage.py migrate
+
+```
+
 ### Start server
 
 Starting Django server
@@ -832,19 +841,6 @@ Update is not allowed
 Success response Exemple:
 - HTTP status: 204
 </details>
-
-## Database
-
-If you need a new and clean database, delete the database file "db.sqlite3"
-
-Build a new one with the following command
-
-```
-python manage.py migrate
-
-```
-
-Now there is a new empty database available.
 
 ## Pytest Verification
 
