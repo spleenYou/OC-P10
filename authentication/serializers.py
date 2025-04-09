@@ -5,6 +5,7 @@ from django.conf import settings
 import datetime
 from api.serializers import ProjectSerializerForUserDetail
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from api.models import Contributor
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -65,8 +66,15 @@ class UserSerializer(serializers.ModelSerializer):
         serializer = ProjectSerializerForUserDetail(queryset, many=True)
         return serializer.data
 
+    def contribute_to(self, user):
+        queryset = Contributor.objects.filter(user=user).exclude(project__author=user)
+        queryset = (contributor.project for contributor in queryset)
+        serializer = ProjectSerializerForUserDetail(queryset, many=True)
+        return serializer.data
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        ret['contribute_to'] = self.contribute_to(instance)
         if not (ret['can_data_be_shared'] or (self.context['request'].user == instance)):
             del ret['birthday']
         return ret
