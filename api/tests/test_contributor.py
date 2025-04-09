@@ -1,5 +1,6 @@
 import pytest
 import CONST as C
+import datetime
 from api.models import Contributor
 
 
@@ -57,6 +58,9 @@ class TestContributor:
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user3_data)}',
         )
 
+    def formated_datetime(self, date):
+        return (date + datetime.timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S.%f+02:00')
+
     def get_token_access(self, user):
         tokens = C.client.post(
             f"{C.user_url}login/",
@@ -80,6 +84,8 @@ class TestContributor:
             'previous': None,
             'results': [
                 {
+                    'id': contributor[0].id,
+                    'date_created': self.formated_datetime(contributor[0].date_created),
                     'project': {
                         'id': self.project.json()['id'],
                         'author': {
@@ -97,6 +103,8 @@ class TestContributor:
                     }
                 },
                 {
+                    'id': contributor[1].id,
+                    'date_created': self.formated_datetime(contributor[1].date_created),
                     'project': {
                         'id': self.project.json()['id'],
                         'author': {
@@ -123,7 +131,10 @@ class TestContributor:
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 200
+        contributor = Contributor.objects.get(pk=1)
         expected_response = {
+            'id': contributor.id,
+            'date_created': self.formated_datetime(contributor.date_created),
             'project': {
                 'id': self.project.json()['id'],
                 'author': {
@@ -172,7 +183,10 @@ class TestContributor:
             HTTP_AUTHORIZATION=f'Bearer {self.get_token_access(C.user2_data)}',
         )
         assert response.status_code == 201
+        contributor = Contributor.objects.get(pk=3)
         expected_response = {
+            'id': contributor.id,
+            'date_created': self.formated_datetime(contributor.date_created),
             'user':
             {
                 'id': self.user2.json()['id'],

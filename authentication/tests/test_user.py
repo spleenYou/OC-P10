@@ -110,6 +110,7 @@ class TestUser:
             'username': self.user1_data['username'],
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
+            'date_created': response.json()['date_created'],
         }
         assert response.json() == expected_response
 
@@ -120,7 +121,7 @@ class TestUser:
         expected_response = {
             'detail':
             [
-                "Aucun compte actif n'a été trouvé avec les identifiants fournis",
+                "Création impossible",
             ]
         }
         assert response.status_code == 400
@@ -142,6 +143,7 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
+            'date_created': response.json()['date_created'],
             'projects_created': [],
             'contribute_to': []
         }
@@ -185,6 +187,7 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
+            'date_created': response.json()['date_created'],
             'projects_created': [],
             'contribute_to': []
         }
@@ -267,6 +270,7 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
+            'date_created': response.json()['date_created'],
             'projects_created': [],
             'contribute_to': []
         }

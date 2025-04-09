@@ -36,10 +36,15 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if attrs['password1'] != attrs['password2']:
             raise serializers.ValidationError(
                 {
-                    'detail': "Aucun compte actif n'a été trouvé avec les identifiants fournis"
+                    'detail': "Création impossible"
                 }
             )
         return attrs
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['date_created'] = instance.date_joined
+        return ret
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -77,6 +82,8 @@ class UserSerializer(serializers.ModelSerializer):
         ret['contribute_to'] = self.contribute_to(instance)
         if not (ret['can_data_be_shared'] or (self.context['request'].user == instance)):
             del ret['birthday']
+        else:
+            ret['date_created'] = instance.date_joined
         return ret
 
 
