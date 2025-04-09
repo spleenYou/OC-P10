@@ -83,7 +83,9 @@ class ContributorSerializer(ModelSerializer):
     class Meta:
         model = Contributor
         fields = [
+            'id',
             'project',
+            'date_created',
         ]
 
     def to_representation(self, instance):

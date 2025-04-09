@@ -15,6 +15,10 @@ class Contributor(models.Model):
         related_name='projects',
         verbose_name='Projet',
     )
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date de création",
+    )
 
     class Meta:
         unique_together = ('user', 'project')
