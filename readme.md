@@ -98,17 +98,23 @@ Success response Exemple:
     "results": [
         {
             "id": 1,
-            "username": "user1"2000-01-01 true,
+            "username": "user1",
+            "birthday": "2000-01-01",
+            "can_be_contacted": true,
             "can_data_be_shared": true,
-            "projects_created": []
+            "projects_created": [],
+            "contribute_to": [],
+            "date_created": "2025-03-26T10:05:53.691163Z"
         },
         {
             "id": 2,
             "username": "user2",
             "birthday": "2000-01-01",
-            "can_be_contacted": false,
-            "can_data_be_shared": true,
-            "projects_created": []
+            "can_be_contacted": true,
+            "can_data_be_shared": false,
+            "projects_created": [],
+            "contribute_to": [],
+            "date_created": "2025-03-26T10:12:06Z"
         }
     ]
 }
@@ -139,7 +145,8 @@ Success response Exemple:
     "username": "user1",
     "birthday": "2000-01-01",
     "can_be_contacted": true,
-    "can_data_be_shared": false
+    "can_data_be_shared": false,
+    "date_created": "2025-04-09T10:13:58.029537Z"
 }
 ```
 </details>
@@ -160,7 +167,9 @@ Success response Exemple:
     "birthday": "2000-01-01",
     "can_be_contacted": true,
     "can_data_be_shared": true,
-    "projects_created": []
+    "projects_created": [],
+    "contribute_to": [],
+    "date_created": "2025-04-09T10:13:58.029537Z"
 }
 ```
 </details>
@@ -186,7 +195,10 @@ Success response Exemple:
     "username": "user-test-1",
     "birthday": "2000-01-01",
     "can_be_contacted": true,
-    "can_data_be_shared": false
+    "can_data_be_shared": false,
+    "project_created": [],
+    "contribute_to": [],
+    "date_created": "2025-04-09T10:13:58.029537Z"
 }
 ```
 </details>
@@ -223,7 +235,8 @@ Success response Exemple:
 ```
 {
     "refresh_token": <token>,
-    "access_token": <token>
+    "access_token": <token>,
+    "expire_in": 300.0
 }
 ```
 </details>
@@ -240,7 +253,8 @@ Success response Exemple:
 - HTTP status: 200
 ```
 {
-    "access_token": <token>
+    "access_token": <token>,
+    "expire_in": 300.0
 }
 ```
 </details>
@@ -699,6 +713,8 @@ Success response Exemple:
     "previous": null,
     "results": [
         {
+            "id": 1,
+            "date_created": "2025-04-08T18:44:25.636337+02:00",
             "user": {
                 "id": 1,
                 "username": "user1"
@@ -716,6 +732,8 @@ Success response Exemple:
             }
         },
         {
+            "id": 2,
+            "date_created": "2025-04-08T20:44:25.636337+02:00",
             "user": {
                 "id": 2,
                 "username": "user2"
@@ -749,6 +767,8 @@ Success response Exemple:
 - HTTP status: 201
 ```
 {
+    "id": 1,
+    "date_created": "2025-04-08T18:44:25.636337+02:00",
     "user": {
         "id": 2,
         "username": "user2"
@@ -778,6 +798,8 @@ Success response Exemple:
 - HTTP status: 200
 ```
 {
+    "id": 1,
+    "date_created": "2025-04-08T18:44:25.636337+02:00",
     "user": {
         "id": 1,
         "username": "user1"
