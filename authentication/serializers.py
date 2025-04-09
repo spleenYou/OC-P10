@@ -3,7 +3,7 @@ from authentication.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.conf import settings
 import datetime
-from api.serializers import ProjectSerializerForUserDetail
+from api.serializers import ProjectSerializerForUserDetail, ProjectSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from api.models import Contributor
 
@@ -69,7 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
     def contribute_to(self, user):
         queryset = Contributor.objects.filter(user=user).exclude(project__author=user)
         queryset = (contributor.project for contributor in queryset)
-        serializer = ProjectSerializerForUserDetail(queryset, many=True)
+        serializer = ProjectSerializer(queryset, many=True)
         return serializer.data
 
     def to_representation(self, instance):

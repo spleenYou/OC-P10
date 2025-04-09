@@ -73,6 +73,7 @@ class ProjectSerializerForUserDetail(ModelSerializer):
             'id',
             'title',
             'project_type',
+            'description',
             'date_created'
         ]
 
