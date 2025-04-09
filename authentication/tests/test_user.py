@@ -142,7 +142,8 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
-            'projects_created': []
+            'projects_created': [],
+            'contribute_to': []
         }
         assert response.json() == expected_response
 
@@ -161,7 +162,8 @@ class TestUser:
             'username': self.user2_data['username'],
             'can_be_contacted': self.user2_data['can_be_contacted'],
             'can_data_be_shared': self.user2_data['can_data_be_shared'],
-            'projects_created': []
+            'projects_created': [],
+            'contribute_to': []
         }
         assert response.json() == expected_response
 
@@ -183,7 +185,8 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
-            'projects_created': []
+            'projects_created': [],
+            'contribute_to': []
         }
 
     def test_user_update_by_another_user_failed(self):
@@ -264,6 +267,7 @@ class TestUser:
             'birthday': self.birthday_formated(),
             'can_be_contacted': self.user1_data['can_be_contacted'],
             'can_data_be_shared': self.user1_data['can_data_be_shared'],
-            'projects_created': []
+            'projects_created': [],
+            'contribute_to': []
         }
         assert response.json() == expected_response
