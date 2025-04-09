@@ -62,7 +62,7 @@ source .<env_name>/bin/activate
 
 ### Database
 
-You need to build a database, Follow the command:
+You need to build a database
 
 ```
 python manage.py migrate
