@@ -125,6 +125,14 @@ class Issue(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        is_new_project = self.pk is None
+        super().save(*args, **kwargs)
+        # Create assigned user from author if project is new and no assigned user
+        if is_new_project and not self.assigned_user:
+            self.assigned_user = self.author
+            self.save()
+
     class Meta:
         verbose_name_plural = 'Questions'
 
